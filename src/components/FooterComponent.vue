@@ -1,5 +1,5 @@
 <template>
-    <footer class="p-4 py-8 bg-[#272a2c] sm:ml-64">
+    <footer class="p-4 py-8 custom-gradient sm:ml-64">
         <div class="flex items-end justify-between max-w-4xl mx-auto mb-8">
             <!-- Logo and Name -->
             <div class="flex items-center">

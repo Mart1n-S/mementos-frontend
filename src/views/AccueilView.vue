@@ -6,7 +6,7 @@ import FooterComponent from '@/components/FooterComponent.vue';
 
 <template>
   <main>
-    <section class="p-4 sm:ml-64">
+    <section class="sm:ml-64 custom-gradient md:p-4">
       <div class="mt-14">
         <HeroSection />
         <FeatureSection />
@@ -15,3 +15,12 @@ import FooterComponent from '@/components/FooterComponent.vue';
   </main>
   <FooterComponent />
 </template>
+
+<style>
+.custom-gradient {
+  background-image: linear-gradient(0deg,
+      #212426 0%,
+      #34383A 58%,
+      #616567 100%);
+}
+</style>

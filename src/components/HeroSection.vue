@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-col items-center justify-center py-10 text-center text-black hero-section">
+    <div class="flex flex-col items-center justify-center p-4 py-10 text-center text-white hero-section">
         <img src="@/assets/images/logo.svg" alt="Mementos Logo" class="w-32 h-32 mb-8" />
         <h1 class="mb-4 text-[50px] font-bold">MEMENTOS</h1>
         <p class="mb-8 text-[22px]">Améliore ta mémoire durablement avec la répétition espacée.</p>

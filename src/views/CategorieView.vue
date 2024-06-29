@@ -1,11 +1,11 @@
 <template>
   <main>
-    <div class="p-4 sm:ml-64">
+    <section class="p-4 sm:ml-64">
       <div class="p-4 mt-14">
         <p>Catégories</p>
 
       </div>
-    </div>
+    </section>
   </main>
   <FooterComponent />
 </template>

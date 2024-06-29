@@ -1,6 +1,6 @@
 <template>
-    <section class="py-10 features-section">
-        <div class="container mx-auto text-center">
+    <section class="py-10 bg-white features-section rounded-t-3xl">
+        <div class="container px-4 mx-auto text-center sm:px-6">
             <h1 class="mb-6 text-[28px] font-bold">Se souvenir de tout pour (quasiment) toujours</h1>
             <p class="mb-6 text-[18px]">La répétition espacée est une technique d'apprentissage efficace...</p>
             <h2 class="mb-4 text-[28px] font-bold">Et Mementos ?</h2>
