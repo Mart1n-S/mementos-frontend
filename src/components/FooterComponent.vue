@@ -12,9 +12,10 @@
             </div>
             <!-- Links -->
             <div class="flex">
-                <a href="#cgu" class="mr-2 text-white underline md:hover:text-gray-800">CGU</a>
-                <a href="#privacy" class="text-white underline md:hover:text-gray-800">Politique de
-                    confidentialité</a>
+                <RouterLink to="/cgu" class="mr-2 text-white underline md:hover:text-gray-800">CGU</RouterLink>
+                <RouterLink to="/politique-confidentialite" class="mr-2 text-white underline md:hover:text-gray-800">
+                    Politique de
+                    confidentialité</RouterLink>
             </div>
         </div>
         <!-- Copyright -->
@@ -26,6 +27,6 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-
+import { RouterLink } from 'vue-router';
 const imageLoaded = ref(false);
 </script>

@@ -15,7 +15,7 @@ const router = createRouter({
       // route level code-splitting
       // this generates a separate chunk (About.[hash].js) for this route
       // which is lazy-loaded when the route is visited.
-      component: () => import('../views/CategorieView.vue')
+      component: () => import('@/views/CategorieView.vue')
     },
     {
       path: '/themes/:category',
@@ -23,7 +23,17 @@ const router = createRouter({
       component: () => import('@/views/ThemeView.vue'),
       props: route => ({ category: route.params.category }),
 
-    }
+    },
+    {
+      path: '/cgu',
+      name: 'cgu',
+      component: () => import('@/views/CguView.vue')
+    },
+    {
+      path: '/politique-confidentialite',
+      name: 'PolitiqueConfidentialite',
+      component: () => import('@/views/PolitiqueConfidentialiteView.vue'),
+    },
   ],
   scrollBehavior() {
     //Permet de remonter en haut de la page à chaque changement de route
