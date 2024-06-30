@@ -1,16 +1,79 @@
 <template>
   <main>
-    <section class="p-4 sm:ml-64">
-      <div class="p-4 mt-14">
-        <p>Catégories</p>
+    <section class="sm:ml-64 custom-gradient md:p-4">
+      <div class="mt-14">
+        <div class="flex flex-col items-center justify-center p-4 py-10 text-center text-white">
+          <!-- Bouton de retour -->
+          <div class="w-full mb-4 text-left">
+            <button @click="goBack" class="text-white hover:text-gray-300">
+              <svg width="35" height="35" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round"
+                stroke-width="3" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M2.9 12h18"></path>
+                <path d="m8.9 18-6-6 6-6"></path>
+              </svg>
+            </button>
+          </div>
+          <h1 class="mb-4 text-[50px] font-bold">CATEGORIES</h1>
+          <p class="mb-8 text-[22px]">Retrouve ici toutes les catégories</p>
 
+          <!-- Barre de recherche -->
+          <SearchBar :modelValue="searchQuery" @update:modelValue="searchQuery = $event" />
+        </div>
+
+        <div class="py-10 bg-white rounded-t-3xl">
+          <div class="container px-4 mx-auto text-center sm:px-6">
+            <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
+              <CategorieItem v-for="category in filteredCategories" :key="category.title" :imageSrc="category.imageSrc"
+                :title="category.title" :buttonColor="category.buttonColor"
+                @click="navigateToCategory(category.title)" />
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   </main>
   <FooterComponent />
 </template>
+
 <script setup lang="ts">
-import FooterComponent from '@/components/FooterComponent.vue'; 
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import FooterComponent from '@/components/FooterComponent.vue';
+import CategorieItem from '@/components/CategorieItem.vue';
+import SearchBar from '@/components/SearchBar.vue';
+
+// Liste des catégories
+const categories = ref([
+  { imageSrc: 'src/assets/images/histoire.jpg', title: 'Histoire', buttonColor: '#A88DFF' },
+  { imageSrc: 'src/assets/images/programmation.jpg', title: 'Programmation', buttonColor: '#EFD81D' },
+  { imageSrc: 'src/assets/images/anglais.jpg', title: 'Anglais', buttonColor: '#6ED3EA' },
+  { imageSrc: 'src/assets/images/pays.jpg', title: 'Pays', buttonColor: '#50db4d' },
+]);
+
+// Modèle pour la barre de recherche
+const searchQuery = ref('');
+
+// Calcul des catégories filtrées
+const filteredCategories = computed(() => {
+  if (!searchQuery.value) {
+    return categories.value;
+  }
+  return categories.value.filter(category =>
+    category.title.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+});
+
+// Navigation vers la vue de la catégorie sélectionnée pour afficher les thèmes correspondants
+const router = useRouter();
+const navigateToCategory = (categoryTitle: string) => {
+  const categorySlug = categoryTitle.toLowerCase();
+  router.push({ name: 'themes', params: { category: categorySlug } });
+};
+
+// Fonction de retour
+const goBack = () => {
+  router.back();
+};
 </script>
 
 <style scoped></style>

@@ -10,18 +10,21 @@
             <p class="mb-6 text-[18px]">Retrouve une multitude de catégories de révision...</p>
 
             <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
-                <CategorieItem imageSrc="src/assets/images/histoire.jpg" title="Histoire" buttonColor="#A88DFF" />
-                <CategorieItem imageSrc="src/assets/images/programmation.jpg" title="Programmation"
-                    buttonColor="#e0e770" />
-                <CategorieItem imageSrc="src/assets/images/anglais.jpg" title="Anglais" buttonColor="#6ED3EA" />
-                <CategorieItem imageSrc="src/assets/images/pays.jpg" title="Pays" buttonColor="#50db4d" />
+                <CategorieItem v-for="(category, index) in categories.slice(0, 3)" :key="index"
+                    :imageSrc="category.imageSrc" :title="category.title" :buttonColor="category.buttonColor"
+                    @click="navigateToCategory(category.title)" />
             </div>
-            <button class="w-full px-4 py-2 mt-8 text-white bg-black rounded btn md:w-4/12 md:hover:bg-gray-800">Voir
-                plus</button>
+
+            <RouterLink to="/categories">
+                <button class="w-full px-4 py-2 mt-8 text-white bg-black rounded btn md:w-4/12 md:hover:bg-gray-800">
+                    Voir
+                    plus </button>
+            </RouterLink>
+
 
             <hr class="mt-6 border-gray-300" id="demo" />
 
-            <!-- Section Démo avec CardRevision -->
+            <!--  Démo avec CardRevision -->
             <div class="mt-12 text-center">
                 <h2 class="mb-4 text-[28px] font-bold">Démo</h2>
                 <p class="mb-6 text-[18px]">Devine la réponse et clique sur la carte pour vérifier la réponse :</p>
@@ -30,7 +33,7 @@
                 </div>
             </div>
             <hr class="mt-6 border-gray-300" />
-            <!-- Nouveau contenu ajouté ici -->
+            <!-- Proposé de s'inscrire -->
             <div class="mt-12 text-center">
                 <h2 class="mb-4 text-[28px] font-bold">Prêt à démarrer?</h2>
                 <p class="mb-6 text-[18px]">Inscris-toi dès maintenant pour explorer toutes les fonctionnalités et
@@ -42,8 +45,27 @@
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import CategorieItem from '@/components/CategorieItem.vue';
 import CardRevision from '@/components/CardRevision.vue';
+
+// Liste des catégories
+const categories = ref([
+    { imageSrc: 'src/assets/images/histoire.jpg', title: 'Histoire', buttonColor: '#A88DFF' },
+    { imageSrc: 'src/assets/images/programmation.jpg', title: 'Programmation', buttonColor: '#EFD81D' },
+    { imageSrc: 'src/assets/images/anglais.jpg', title: 'Anglais', buttonColor: '#6ED3EA' },
+    { imageSrc: 'src/assets/images/pays.jpg', title: 'Pays', buttonColor: '#50db4d' },
+]);
+
+// Utilisation du router pour la navigation
+const router = useRouter();
+
+// Navigation vers la vue de la catégorie sélectionnée pour afficher les thèmes correspondants
+const navigateToCategory = (categoryTitle: string) => {
+    const categorySlug = categoryTitle.toLowerCase();
+    router.push({ name: 'themes', params: { category: categorySlug } });
+};
 </script>
 
 <style scoped>
