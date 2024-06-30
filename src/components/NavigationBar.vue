@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import { RouterLink } from 'vue-router';
+
+const imageLoaded = ref(false);
 </script>
 
 <template>
@@ -19,7 +22,11 @@ import { RouterLink } from 'vue-router';
                         </svg>
                     </button>
                     <RouterLink to="/" class="flex ms-2 md:me-24">
-                        <img alt="logo mementos" class="mr-2 h-9 w-9" src="@/assets/images/logo.svg" />
+                        <!-- Squelette de chargement pour l'image -->
+                        <div v-if="!imageLoaded" class="mr-2 bg-gray-300 w-7 h-9 animate-pulse"></div>
+                        <!-- Image réelle -->
+                        <img v-show="imageLoaded" src="@/assets/images/logo.svg" alt="Mementos Logo"
+                            class="mr-2 h-9 w-9" @load="imageLoaded = true" />
                         <span
                             class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">Mementos</span>
                     </RouterLink>

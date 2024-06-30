@@ -1,6 +1,10 @@
 <template>
     <div class="relative">
-        <img :src="imageSrc" alt="Category Image" class="object-cover w-full h-64 shadow-lg">
+        <!-- Squelette de chargement pour l'image -->
+        <div v-if="!imageLoaded" class="object-cover w-full h-64 bg-gray-300 shadow-lg animate-pulse"></div>
+        <!-- Image réelle -->
+        <img v-show="imageLoaded" :src="imageSrc" alt="Category Image" class="object-cover w-full h-64 shadow-lg"
+            @load="imageLoaded = true" />
         <button :style="{ backgroundColor: buttonColor }"
             class="absolute bottom-0 left-0 flex items-center justify-between w-full px-4 py-2 text-lg font-semibold text-white">
             {{ title }}
@@ -17,6 +21,7 @@
 
 <script setup lang="ts">
 import { defineProps } from 'vue';
+import { ref } from 'vue';
 
 defineProps({
     imageSrc: {
@@ -32,6 +37,8 @@ defineProps({
         required: true
     }
 });
+
+const imageLoaded = ref(false);
 </script>
 
 <style scoped></style>

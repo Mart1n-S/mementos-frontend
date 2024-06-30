@@ -3,7 +3,11 @@
         <div class="flex items-end justify-between max-w-4xl mx-auto mb-8">
             <!-- Logo and Name -->
             <div class="flex items-center">
-                <img src="@/assets/images/logo.svg" alt="Mementos Logo" class="h-8 mr-2">
+                <!-- Squelette de chargement pour l'image -->
+                <div v-if="!imageLoaded" class="w-6 h-8 mr-2 bg-gray-300 animate-pulse"></div>
+                <!-- Image réelle -->
+                <img v-show="imageLoaded" src="@/assets/images/logo.svg" alt="Mementos Logo" class="h-8 mr-2"
+                    @load="imageLoaded = true" />
                 <span class="text-lg font-bold text-[24px] text-white ">Mementos</span>
             </div>
             <!-- Links -->
@@ -20,8 +24,8 @@
     </footer>
 </template>
 
-<script>
-export default {
-    name: 'FooterComponent'
-}
+<script setup lang="ts">
+import { ref } from 'vue';
+
+const imageLoaded = ref(false);
 </script>
