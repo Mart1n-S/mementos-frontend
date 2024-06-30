@@ -16,8 +16,13 @@
                 <CategorieItem imageSrc="src/assets/images/anglais.jpg" title="Anglais" buttonColor="#6ED3EA" />
                 <CategorieItem imageSrc="src/assets/images/pays.jpg" title="Pays" buttonColor="#50db4d" />
             </div>
-            <button class="w-full px-4 py-2 mt-8 text-white bg-black rounded btn md:w-4/12 md:hover:bg-gray-800">Voir
-                plus</button>
+            <button class="w-full px-4 py-2 mt-8 text-white bg-black rounded btn md:w-4/12 md:hover:bg-gray-800">
+                <RouterLink to="/categories">
+
+                    Voir
+                    plus
+                </RouterLink>
+            </button>
 
             <hr class="mt-6 border-gray-300" id="demo" />
 
