@@ -34,6 +34,12 @@ const router = createRouter({
       name: 'PolitiqueConfidentialite',
       component: () => import('@/views/PolitiqueConfidentialiteView.vue'),
     },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      component: () => import('@/views/NotFoundView.vue')
+    }
+
   ],
   scrollBehavior() {
     //Permet de remonter en haut de la page à chaque changement de route
