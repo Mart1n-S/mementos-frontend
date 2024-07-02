@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import AccueilView from '../views/AccueilView.vue'
+import { isAuthenticated } from '@/utils/auth';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -8,6 +9,12 @@ const router = createRouter({
       path: '/',
       name: 'accueil',
       component: AccueilView
+    },
+    {
+      path: '/inscription',
+      name: 'inscription',
+      component: () => import('@/views/InscriptionView.vue'),
+      meta: { requiresGuest: true }
     },
     {
       path: '/categories',
@@ -46,5 +53,16 @@ const router = createRouter({
     return { top: 0 };
   },
 })
+
+// Ajoute la garde de navigation
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(record => record.meta.requiresGuest) && isAuthenticated()) {
+    // Si la route nécessite un invité et que l'utilisateur est authentifié, rediriger vers l'accueil
+    next({ name: 'accueil' });
+  } else {
+    next(); // Sinon, continuer la navigation
+  }
+});
+
 
 export default router
