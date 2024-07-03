@@ -17,6 +17,12 @@ const router = createRouter({
       meta: { requiresGuest: true }
     },
     {
+      path: '/connexion',
+      name: 'connexion',
+      component: () => import('@/views/ConnexionView.vue'),
+      meta: { requiresGuest: true }
+    },
+    {
       path: '/categories',
       name: 'categories',
       // route level code-splitting

@@ -7,10 +7,23 @@ export const useAuthStore = defineStore('auth', () => {
     const router = useRouter();
     const isAuthenticated = ref(false);
     const user = ref<{ name?: string; email?: string } | null>(null);
+    const errorMessage = ref<string | null>(null);
 
-    function login(userData: { name: string; email: string }) {
-        isAuthenticated.value = true;
-        user.value = userData;
+    async function login(email: string, password: string) {
+        try {
+            const response = await axios.post('/login', { email, password });
+            const token = response.data.token;
+            // const userData = response.data.user;
+            localStorage.setItem('access_token', token);
+            errorMessage.value = null; // Vide le message d'erreur
+            router.push('/'); // Rediriger vers la page d'accueil
+        } catch (error: any) {
+            if (error.response && error.response.status === 401) {
+                errorMessage.value = 'Oops! Les identifiants sont incorrects.';
+            } else {
+                errorMessage.value = 'Erreur lors de la connexion.';
+            }
+        }
     }
 
     async function logout() {
@@ -41,6 +54,10 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
-    return { isAuthenticated, user, login, logout, checkAuth };
+    function clearError() {
+        errorMessage.value = null;
+    }
+
+    return { isAuthenticated, user, login, errorMessage, logout, checkAuth, clearError };
 });
 

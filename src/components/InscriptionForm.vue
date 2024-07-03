@@ -100,7 +100,10 @@
                 S'inscrire
             </button>
             <p class="mt-4 text-center">
-                Vous avez déjà un compte ? <a href="#" class="text-blue-600 hover:underline">Se connecter</a>
+                Vous avez déjà un compte ?
+                <RouterLink to="/connexion" class="text-blue-600 hover:underline">
+                    Se connecter
+                </RouterLink>
             </p>
         </form>
     </div>
