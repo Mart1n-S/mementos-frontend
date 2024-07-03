@@ -25,8 +25,17 @@
     </footer>
 </template>
 
-<script setup lang="ts">
-import { ref } from 'vue';
-import { RouterLink } from 'vue-router';
-const imageLoaded = ref(false);
+<script lang="ts">
+import { defineComponent, ref } from 'vue';
+
+export default defineComponent({
+    setup() {
+        const imageLoaded = ref(false);
+
+        return {
+            imageLoaded
+        };
+    }
+});
+
 </script>

@@ -14,19 +14,27 @@
     </div>
 </template>
 
-<script setup lang="ts">
-import { defineProps } from 'vue';
+<script lang="ts">
+import { defineComponent } from 'vue';
 
-defineProps({
-    title: {
-        type: String,
-        required: true
+export default defineComponent({
+    props: {
+        title: {
+            type: String,
+            required: true
+        },
+        buttonColor: {
+            type: String,
+            required: true
+        }
     },
-    buttonColor: {
-        type: String,
-        required: true
+    setup(props) {
+        return {
+            ...props
+        };
     }
 });
+
 </script>
 
 <style scoped></style>

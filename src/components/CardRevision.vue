@@ -14,25 +14,34 @@
     </div>
 </template>
 
-<script setup lang="ts">
-import { ref } from 'vue';
+<script lang="ts">
+import { defineComponent, ref } from 'vue';
 
-defineProps({
-    question: {
-        type: String,
-        required: true,
+export default defineComponent({
+    props: {
+        question: {
+            type: String,
+            required: true,
+        },
+        answer: {
+            type: String,
+            required: true,
+        },
     },
-    answer: {
-        type: String,
-        required: true,
-    },
+    setup(props) {
+        const isFlipped = ref(false);
+
+        const flipCard = () => {
+            isFlipped.value = !isFlipped.value;
+        };
+
+        return {
+            isFlipped,
+            flipCard,
+            ...props
+        };
+    }
 });
-
-const isFlipped = ref(false);
-
-const flipCard = () => {
-    isFlipped.value = !isFlipped.value;
-};
 </script>
 
 <style scoped>

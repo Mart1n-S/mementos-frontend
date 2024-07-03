@@ -1,8 +1,22 @@
-<script setup lang="ts">
-import { ref } from 'vue';
-import { RouterLink } from 'vue-router';
+<script lang="ts">
+import { defineComponent, ref, onMounted } from 'vue';
+import { useAuthStore } from '@/stores/authStore';
 
-const imageLoaded = ref(false);
+export default defineComponent({
+    setup() {
+        const imageLoaded = ref(false);
+        const authStore = useAuthStore();
+
+        onMounted(() => {
+            authStore.checkAuth();
+        });
+
+        return {
+            imageLoaded,
+            authStore
+        };
+    }
+});
 </script>
 
 <template>
@@ -31,7 +45,69 @@ const imageLoaded = ref(false);
                             class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">Mementos</span>
                     </RouterLink>
                 </div>
+                <div class="flex items-center">
+                    <div class="flex items-center ms-3">
+                        <div>
+                            <button type="button"
+                                class="flex text-sm bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+                                aria-expanded="false" data-dropdown-toggle="dropdown-user">
+                                <span class="sr-only">Open user menu</span>
 
+                                <svg width="30" height="30" fill="none" stroke="#ffffff" stroke-linecap="round"
+                                    stroke-linejoin="round" stroke-width="1" viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"></path>
+                                    <path d="M21 22a9 9 0 1 0-18 0"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600"
+                            id="dropdown-user">
+                            <div v-if="authStore.isAuthenticated" class="px-4 py-3" role="none">
+                                <p class="text-sm text-gray-900 dark:text-white" role="none">
+                                    {{ authStore.user?.name }}
+                                </p>
+                                <p class="text-sm font-medium text-gray-900 truncate dark:text-gray-300" role="none">
+                                    {{ authStore.user?.email }}
+                                </p>
+                            </div>
+                            <ul v-if="authStore.isAuthenticated" class="py-1" role="none">
+                                <li>
+                                    <RouterLink to="/profil"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+                                        role="menuitem">Profil</RouterLink>
+                                </li>
+                                <li>
+                                    <RouterLink to="/parametres"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+                                        role="menuitem">Paramètres</RouterLink>
+                                </li>
+                                <li>
+                                    <button @click="authStore.logout"
+                                        class="block w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+                                        role="menuitem">Déconnexion</button>
+                                </li>
+                            </ul>
+                            <ul v-else class="py-1" role="none">
+                                <li>
+                                    <RouterLink to="/connexion"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+                                        role="menuitem">Connexion</RouterLink>
+                                </li>
+                                <li>
+                                    <RouterLink to="/inscription"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+                                        role="menuitem">Inscription</RouterLink>
+                                </li>
+                                <li>
+                                    <RouterLink to="/invite"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+                                        role="menuitem">Invité</RouterLink>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>

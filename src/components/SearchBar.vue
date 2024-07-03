@@ -13,21 +13,28 @@
     </div>
 </template>
 
-<script setup lang="ts">
-import { defineProps, defineEmits } from 'vue';
+<script lang="ts">
+import { defineComponent } from 'vue';
 
-defineProps({
-    modelValue: {
-        type: String,
-        required: true
+export default defineComponent({
+    props: {
+        modelValue: {
+            type: String,
+            required: true
+        }
+    },
+    emits: ['update:modelValue'],
+    setup(props, { emit }) {
+        const updateValue = (event: Event) => {
+            emit('update:modelValue', (event.target as HTMLInputElement).value);
+        };
+
+        return {
+            updateValue
+        };
     }
 });
 
-const emits = defineEmits(['update:modelValue']);
-
-const updateValue = (event: Event) => {
-    emits('update:modelValue', (event.target as HTMLInputElement).value);
-};
 </script>
 
 <style scoped></style>

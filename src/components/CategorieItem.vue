@@ -19,26 +19,34 @@
     </div>
 </template>
 
-<script setup lang="ts">
-import { defineProps } from 'vue';
-import { ref } from 'vue';
 
-defineProps({
-    imageSrc: {
-        type: String,
-        required: true
+<script lang="ts">
+import { defineComponent, ref } from 'vue';
+
+export default defineComponent({
+    props: {
+        imageSrc: {
+            type: String,
+            required: true
+        },
+        title: {
+            type: String,
+            required: true
+        },
+        buttonColor: {
+            type: String,
+            required: true
+        }
     },
-    title: {
-        type: String,
-        required: true
-    },
-    buttonColor: {
-        type: String,
-        required: true
+    setup(props) {
+        const imageLoaded = ref(false);
+
+        return {
+            imageLoaded,
+            ...props
+        };
     }
 });
-
-const imageLoaded = ref(false);
 </script>
 
 <style scoped></style>
