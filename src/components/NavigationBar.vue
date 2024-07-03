@@ -1,6 +1,5 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
-// import { RouterLink } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
 
 export default defineComponent({

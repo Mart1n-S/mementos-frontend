@@ -106,74 +106,77 @@
     </div>
 </template>
 
-<script>
+<script lang="ts">
 import axios from '@/modules/axios';
-import { useRouter } from 'vue-router'
-export default {
-    data() {
-        return {
-            pseudo: '',
-            email: '',
-            niveau: '',
-            password: '',
-            confirmPassword: '',
-            terms: false,
-            errors: {},
-            attemptedSubmit: false,
-            showPassword: false
-        };
-    },
+import { defineComponent, ref } from 'vue';
+import { useRouter } from 'vue-router';
+
+interface RegisterResponse {
+    token: string;
+}
+
+interface ValidationErrors {
+    email?: string[];
+    password?: string[];
+}
+
+export default defineComponent({
     setup() {
         const router = useRouter();
-        return { router };
-    },
-    methods: {
-        togglePasswordVisibility() {
-            this.showPassword = !this.showPassword;
-        },
-        async register() {
-            this.attemptedSubmit = true;
-            this.errors = {};
+        const pseudo = ref('');
+        const email = ref('');
+        const niveau = ref('');
+        const password = ref('');
+        const confirmPassword = ref('');
+        const terms = ref(false);
+        const errors = ref<{ email?: string; password?: string; terms?: string }>({});
+        const attemptedSubmit = ref(false);
+        const showPassword = ref(false);
 
-            if (this.password !== this.confirmPassword) {
-                this.errors.password = "Les mots de passe ne correspondent pas";
+        const togglePasswordVisibility = () => {
+            showPassword.value = !showPassword.value;
+        };
+
+        const register = async () => {
+            attemptedSubmit.value = true;
+            errors.value = {};
+
+            if (password.value !== confirmPassword.value) {
+                errors.value.password = "Les mots de passe ne correspondent pas";
                 return;
             }
-            if (!this.terms) {
-                this.errors.terms = "Vous devez accepter les conditions générales d'utilisation";
+            if (!terms.value) {
+                errors.value.terms = "Vous devez accepter les conditions générales d'utilisation";
                 return;
             }
 
             try {
-                const response = await axios.post('/create-user', {
-                    name: this.pseudo,
-                    email: this.email,
-                    niveau: this.niveau,
-                    password: this.password,
-                    password_confirmation: this.confirmPassword
+                const response = await axios.post<RegisterResponse>('/create-user', {
+                    name: pseudo.value,
+                    email: email.value,
+                    niveau: niveau.value,
+                    password: password.value,
+                    password_confirmation: confirmPassword.value
                 });
 
                 if (response.status === 201) {
                     console.log("Inscription réussie !");
-                    // Stocker le token reçu
                     const token = response.data.token;
                     localStorage.setItem('access_token', token);
-                    // Rediriger vers la page d'accueil à terme vers le profil
-                    this.router.push('/');
+                    router.push('/');
                 }
-            } catch (error) {
+            } catch (error: any) {
                 if (error.response && error.response.data) {
                     console.log(error.response.data);
-                    // Définir les erreurs en fonction du statut HTTP
                     if (error.response.status === 409) {
-                        this.errors.email = "Cet email est déjà utilisé.";
+                        errors.value.email = "Cet email est déjà utilisé.";
                     } else if (error.response.status === 422) {
-                        const validationErrors = error.response.data.errors;
+                        const validationErrors: ValidationErrors = error.response.data.errors;
                         if (validationErrors.email) {
-                            this.errors.email = validationErrors.email[0];
+                            errors.value.email = validationErrors.email[0];
                         }
                         if (validationErrors.password) {
-                            this.errors.password = validationErrors.password[0];
+                            errors.value.password = validationErrors.password[0];
                         }
                     } else {
                         alert("Erreur lors de l'inscription : " + (error.response.data.message || ''));
@@ -183,9 +186,24 @@ export default {
                     alert("Erreur interne du serveur !");
                 }
             }
-        }
+        };
+
+        return {
+            pseudo,
+            email,
+            niveau,
+            password,
+            confirmPassword,
+            terms,
+            errors,
+            attemptedSubmit,
+            showPassword,
+            togglePasswordVisibility,
+            register,
+            router
+        };
     }
-};
+});
 </script>
 
 <style></style>

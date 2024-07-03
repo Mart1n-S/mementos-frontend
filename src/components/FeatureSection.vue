@@ -38,42 +38,49 @@
                 <h2 class="mb-4 text-[28px] font-bold">Prêt à démarrer?</h2>
                 <p class="mb-6 text-[18px]">Inscris-toi dès maintenant pour explorer toutes les fonctionnalités et
                     commencer ton apprentissage!</p>
-                <button class="w-full btn btn-primary md:w-4/12">Commencer</button>
+                <button
+                    class="w-full btn btn-primary px-4 py-2 rounded-[3px] text-[20px] text-white font-semibold h-[49px] bg-[#2698E2] md:hover:bg-[#46a9ef] md:w-4/12">Commencer</button>
             </div>
         </div>
     </section>
 </template>
 
-<script setup lang="ts">
-import { ref } from 'vue';
+<script lang="ts">
+import { defineComponent, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import CategorieItem from '@/components/CategorieItem.vue';
 import CardRevision from '@/components/CardRevision.vue';
 
-// Liste des catégories
-const categories = ref([
-    { imageSrc: 'src/assets/images/histoire.jpg', title: 'Histoire', buttonColor: '#A88DFF' },
-    { imageSrc: 'src/assets/images/programmation.jpg', title: 'Programmation', buttonColor: '#EFD81D' },
-    { imageSrc: 'src/assets/images/anglais.jpg', title: 'Anglais', buttonColor: '#6ED3EA' },
-    { imageSrc: 'src/assets/images/pays.jpg', title: 'Pays', buttonColor: '#50db4d' },
-]);
+export default defineComponent({
+    components: {
+        CategorieItem,
+        CardRevision
+    },
+    setup() {
+        // Liste des catégories
+        const categories = ref([
+            { imageSrc: 'src/assets/images/histoire.jpg', title: 'Histoire', buttonColor: '#A88DFF' },
+            { imageSrc: 'src/assets/images/programmation.jpg', title: 'Programmation', buttonColor: '#EFD81D' },
+            { imageSrc: 'src/assets/images/anglais.jpg', title: 'Anglais', buttonColor: '#6ED3EA' },
+            { imageSrc: 'src/assets/images/pays.jpg', title: 'Pays', buttonColor: '#50db4d' },
+        ]);
 
-// Utilisation du router pour la navigation
-const router = useRouter();
+        // Utilisation du router pour la navigation
+        const router = useRouter();
 
-// Navigation vers la vue de la catégorie sélectionnée pour afficher les thèmes correspondants
-const navigateToCategory = (categoryTitle: string) => {
-    const categorySlug = categoryTitle.toLowerCase();
-    router.push({ name: 'themes', params: { category: categorySlug } });
-};
+        // Navigation vers la vue de la catégorie sélectionnée pour afficher les thèmes correspondants
+        const navigateToCategory = (categoryTitle: string) => {
+            const categorySlug = categoryTitle.toLowerCase();
+            router.push({ name: 'themes', params: { category: categorySlug } });
+        };
+
+        return {
+            categories,
+            navigateToCategory
+        };
+    }
+});
+
 </script>
 
-<style scoped>
-.btn {
-    @apply px-4 py-2 rounded-[3px] text-[20px] text-white font-semibold h-[49px];
-}
-
-.btn-primary {
-    @apply bg-[#2698E2] md:hover:bg-[#46a9ef];
-}
-</style>
+<style scoped></style>
