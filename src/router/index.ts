@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import AccueilView from '../views/AccueilView.vue'
-import { isAuthenticated } from '@/utils/auth';
+import { useAuthStore } from '@/stores/authStore';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -56,13 +56,18 @@ const router = createRouter({
 
 // Ajoute la garde de navigation
 router.beforeEach((to, from, next) => {
-  if (to.matched.some(record => record.meta.requiresGuest) && isAuthenticated()) {
-    // Si la route nécessite un invité et que l'utilisateur est authentifié, rediriger vers l'accueil
+  const authStore = useAuthStore();
+  // Vérifie si la route nécessite un accès invité et si l'utilisateur est authentifié
+  if (to.matched.some(record => record.meta.requiresGuest) && authStore.isAuthenticated) {
+    // Redirige vers la page d'accueil si l'utilisateur est déjà authentifié
     next({ name: 'accueil' });
   } else {
-    next(); // Sinon, continuer la navigation
+    // Poursuivre la navigation
+    next();
   }
-});
 
+  // Vérifie l'état d'authentification avant chaque navigation
+  authStore.checkAuth();
+});
 
 export default router
