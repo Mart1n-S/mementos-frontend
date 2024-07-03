@@ -34,7 +34,7 @@
             </div>
             <hr class="mt-6 border-gray-300" />
             <!-- Proposé de s'inscrire -->
-            <div class="mt-12 text-center">
+            <div v-if="!authStore.isAuthenticated" class="mt-12 text-center">
                 <h2 class="mb-4 text-[28px] font-bold">Prêt à démarrer?</h2>
                 <p class="mb-6 text-[18px]">Inscris-toi dès maintenant pour explorer toutes les fonctionnalités et
                     commencer ton apprentissage!</p>
@@ -50,6 +50,7 @@ import { defineComponent, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import CategorieItem from '@/components/CategorieItem.vue';
 import CardRevision from '@/components/CardRevision.vue';
+import { useAuthStore } from '@/stores/authStore';
 
 export default defineComponent({
     components: {
@@ -65,6 +66,8 @@ export default defineComponent({
             { imageSrc: 'src/assets/images/pays.jpg', title: 'Pays', buttonColor: '#50db4d' },
         ]);
 
+        const authStore = useAuthStore();
+
         // Utilisation du router pour la navigation
         const router = useRouter();
 
@@ -76,7 +79,8 @@ export default defineComponent({
 
         return {
             categories,
-            navigateToCategory
+            navigateToCategory,
+            authStore
         };
     }
 });
