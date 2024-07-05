@@ -2,6 +2,9 @@
     <div class="flex flex-col items-center min-h-screen py-10 bg-white rounded-t-3xl">
         <h1 class="mb-8 text-5xl font-bold">Connexion</h1>
         <form class="w-full max-w-md px-4" @submit.prevent="login">
+            <p v-if="successMessage" class="mt-2 mb-4 text-lg text-center text-green-600">
+                <span class="font-medium">Succès!</span> {{ successMessage }}
+            </p>
             <p v-if="authStore.errorMessage" class="mt-2 mb-4 text-lg text-center text-red-600 dark:text-red-500">
                 <span class="font-medium">Oops!</span> {{ authStore.errorMessage }}
             </p>
@@ -30,7 +33,9 @@
                 Se connecter
             </button>
             <p class="mt-4 text-center">
-                <a href="#" class="underline">Mot de passe oublié ?</a>
+                <RouterLink to="/reset-password" class="underline">
+                    Mot de passe oublié ?
+                </RouterLink>
             </p>
         </form>
         <div class="w-full max-w-md px-4">
@@ -54,6 +59,7 @@
 import { ref, onMounted } from 'vue';
 import { defineComponent } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
+import { useRoute } from 'vue-router';
 
 export default defineComponent({
     setup() {
@@ -61,6 +67,8 @@ export default defineComponent({
         const password = ref('');
         const showPassword = ref(false);
         const authStore = useAuthStore();
+        const route = useRoute();
+        const successMessage = ref('');
 
         const togglePasswordVisibility = () => {
             showPassword.value = !showPassword.value;
@@ -71,6 +79,9 @@ export default defineComponent({
         };
 
         onMounted(() => {
+            if (route.query.reset === 'success') {
+                successMessage.value = 'Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.';
+            }
             authStore.clearError();
         });
 
@@ -80,7 +91,8 @@ export default defineComponent({
             showPassword,
             authStore,
             togglePasswordVisibility,
-            login
+            login,
+            successMessage
         };
     }
 });

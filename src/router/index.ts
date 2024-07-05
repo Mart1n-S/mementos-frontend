@@ -23,6 +23,17 @@ const router = createRouter({
       meta: { requiresGuest: true }
     },
     {
+      path: '/reset-password',
+      name: 'reset-password',
+      component: () => import('@/views/RequestResetPasswordView.vue'),
+      meta: { requiresGuest: true }
+    },
+    {
+      path: '/change-password',
+      name: 'change-password',
+      component: () => import('@/views/ResetPasswordView.vue')
+    },
+    {
       path: '/categories',
       name: 'categories',
       // route level code-splitting

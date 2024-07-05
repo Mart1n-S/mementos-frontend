@@ -8,6 +8,7 @@ export const useAuthStore = defineStore('auth', () => {
     const isAuthenticated = ref(false);
     const user = ref<{ name?: string; email?: string } | null>(null);
     const errorMessage = ref<string | null>(null);
+    const successMessage = ref<string | null>(null);
 
     async function login(email: string, password: string) {
         try {
@@ -23,6 +24,34 @@ export const useAuthStore = defineStore('auth', () => {
             } else {
                 errorMessage.value = 'Erreur lors de la connexion.';
             }
+        }
+    }
+
+    async function forgotPassword(email: string) {
+        try {
+            await axios.post('/forgot-password', { email });
+            successMessage.value = 'Si un compte existe avec cet email, un email de réinitialisation vous sera envoyé.';
+            errorMessage.value = null;
+        } catch (error: any) {
+            errorMessage.value = 'Erreur lors de l\'envoi de l\'email de réinitialisation.';
+            successMessage.value = null;
+        }
+    }
+
+    async function resetPassword(token: string, email: string, password: string, passwordConfirmation: string) {
+        try {
+            await axios.post('/reset-password', {
+                token,
+                email,
+                password,
+                password_confirmation: passwordConfirmation
+            });
+            successMessage.value = 'Mot de passe réinitialisé avec succès.';
+            errorMessage.value = null;
+            router.push({ name: 'connexion', query: { reset: 'success' } });
+        } catch (error: any) {
+            errorMessage.value = 'Erreur lors de la réinitialisation du mot de passe.';
+            successMessage.value = null;
         }
     }
 
@@ -58,6 +87,10 @@ export const useAuthStore = defineStore('auth', () => {
         errorMessage.value = null;
     }
 
-    return { isAuthenticated, user, login, errorMessage, logout, checkAuth, clearError };
+    function clearSuccess() {
+        successMessage.value = null;
+    }
+
+    return { isAuthenticated, user, errorMessage, successMessage, login, forgotPassword, resetPassword, logout, checkAuth, clearError, clearSuccess };
 });
 
