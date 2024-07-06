@@ -21,6 +21,7 @@ export const useAuthStore = defineStore('auth', () => {
                 }
             });
             user.value = response.data;
+            localStorage.setItem('user', JSON.stringify(user.value));
         } catch (error) {
             console.error('Échec de la récupération des données utilisateur:', error);
         }
@@ -142,28 +143,44 @@ export const useAuthStore = defineStore('auth', () => {
             isAuthenticated.value = false;
             user.value = null;
             localStorage.removeItem('access_token');
+            localStorage.removeItem('user');
             router.push('/');
         } catch (error) {
             console.error('Failed to logout:', error);
         }
     }
 
+    function loadUserFromLocalStorage() {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            user.value = JSON.parse(storedUser);
+            isAuthenticated.value = true;
+        } else {
+            user.value = null;
+            isAuthenticated.value = false;
+        }
+    }
+
     function checkAuth() {
         const token = localStorage.getItem('access_token');
         if (token) {
-            isAuthenticated.value = true;
+            loadUserFromLocalStorage();
         } else {
             isAuthenticated.value = false;
         }
     }
 
+
+
     function clearError() {
         errorMessage.value = null;
+        validationErrors.value = {};
     }
 
     function clearSuccess() {
         successMessage.value = null;
     }
-    return { isAuthenticated, user, errorMessage, validationErrors, successMessage, login, register, forgotPassword, resetPassword, logout, checkAuth, clearError, clearSuccess, fetchUser };
+
+    return { isAuthenticated, user, errorMessage, validationErrors, successMessage, login, register, forgotPassword, resetPassword, logout, checkAuth, clearError, clearSuccess, fetchUser, loadUserFromLocalStorage };
 });
 

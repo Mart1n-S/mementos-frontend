@@ -23,6 +23,12 @@ const router = createRouter({
       meta: { requiresGuest: true }
     },
     {
+      path: '/profil',
+      name: 'profil',
+      component: () => import('@/views/ProfilView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/reset-password',
       name: 'reset-password',
       component: () => import('@/views/RequestResetPasswordView.vue'),
@@ -74,17 +80,22 @@ const router = createRouter({
 // Ajoute la garde de navigation
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
+
+  // Vérifie l'état d'authentification avant chaque navigation
+  authStore.checkAuth();
+
   // Vérifie si la route nécessite un accès invité et si l'utilisateur est authentifié
   if (to.matched.some(record => record.meta.requiresGuest) && authStore.isAuthenticated) {
     // Redirige vers la page d'accueil si l'utilisateur est déjà authentifié
     next({ name: 'accueil' });
+  } else if (to.matched.some(record => record.meta.requiresAuth) && !authStore.isAuthenticated) {
+    // Redirige vers la page de connexion si l'utilisateur n'est pas authentifié
+    next({ name: 'connexion' });
   } else {
     // Poursuivre la navigation
     next();
   }
-
-  // Vérifie l'état d'authentification avant chaque navigation
-  authStore.checkAuth();
 });
+
 
 export default router
