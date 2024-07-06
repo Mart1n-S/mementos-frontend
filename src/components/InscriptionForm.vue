@@ -7,6 +7,9 @@
                 <input type="text" id="pseudo" name="pseudo"
                     class="block w-full p-4 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Pseudo" required v-model="pseudo">
+                <p v-if="errors.pseudo" class="mt-2 text-sm text-red-600 dark:text-red-500">
+                    <span class="font-medium">Oops!</span> {{ errors.pseudo }}
+                </p>
             </div>
             <div class="mb-6">
                 <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email</label>
@@ -18,10 +21,14 @@
                 </p>
             </div>
             <div class="mb-6">
-                <label for="niveau" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Niveau</label>
-                <input type="number" id="niveau" name="niveau"
+                <label for="niveauRevision" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Niveau
+                    de révision</label>
+                <input type="number" id="niveauRevision" name="niveauRevision"
                     class="block w-full p-4 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Niveau" required v-model="niveau" step="1" min="1" max="7">
+                    placeholder="Niveau" required v-model="niveauRevision" step="1" min="1" max="7">
+                <p v-if="errors.niveauRevision" class="mt-2 text-sm text-red-600 dark:text-red-500">
+                    <span class="font-medium">Oops!</span> {{ errors.niveauRevision }}
+                </p>
             </div>
             <div class="flex p-4 mb-4 text-sm text-blue-800 bg-yellow-100 rounded-lg dark:bg-gray-800 dark:text-blue-400"
                 role="alert">
@@ -44,7 +51,7 @@
                     <p class="mt-2">Vous pouvez régler le niveau dans vos paramètres.</p>
                 </div>
             </div>
-            <div class="relative mb-6">
+            <div class="relative">
                 <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Mot de
                     passe</label>
                 <input :type="showPassword ? 'text' : 'password'" id="password" name="password"
@@ -58,7 +65,10 @@
                     <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"></path>
                 </svg>
             </div>
-            <div class="flex p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50" role="alert">
+            <p v-if="errors.password" class="mt-2 text-sm text-red-600 dark:text-red-500">
+                <span class="font-medium">Oops!</span> {{ errors.password }}
+            </p>
+            <div class="flex p-4 my-4 text-sm text-blue-800 rounded-lg bg-blue-50" role="alert">
                 <svg class="flex-shrink-0 inline w-4 h-4 me-3 mt-[2px]" aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                     <path
@@ -80,9 +90,6 @@
                 <input :type="showPassword ? 'text' : 'password'" id="confirm_password" name="confirm_password"
                     class="block w-full p-4 pr-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Confirmation du mot de passe" required v-model="confirmPassword">
-                <p v-if="errors.password" class="mt-2 text-sm text-red-600 dark:text-red-500">
-                    <span class="font-medium">Oops!</span> {{ errors.password }}
-                </p>
             </div>
             <div class="flex items-center justify-center mb-6">
                 <input id="terms" type="checkbox" name="terms"
@@ -91,7 +98,7 @@
                 <label
                     :class="{ 'text-red-600': !terms && attemptedSubmit, 'text-gray-900': terms || !attemptedSubmit }"
                     for="terms" class="block ml-2 text-sm">
-                    <RouterLink to="/cgu" class="underline">J'accepte les
+                    <RouterLink to="/cgu" class="underline" target="_blank">J'accepte les
                         conditions générales d'utilisation</RouterLink>
                 </label>
             </div>
@@ -110,17 +117,12 @@
 </template>
 
 <script lang="ts">
-import axios from '@/modules/axios';
 import { defineComponent, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/authStore';
 
-interface RegisterResponse {
-    token: string;
-}
-
-interface ValidationErrors {
-    email?: string[];
-    password?: string[];
+interface ValidationError {
+    [key: string]: string | undefined;
 }
 
 export default defineComponent({
@@ -128,13 +130,16 @@ export default defineComponent({
         const router = useRouter();
         const pseudo = ref('');
         const email = ref('');
-        const niveau = ref('');
+        const niveauRevision = ref('');
         const password = ref('');
         const confirmPassword = ref('');
         const terms = ref(false);
-        const errors = ref<{ email?: string; password?: string; terms?: string }>({});
+        const errors = ref<ValidationError>({});
         const attemptedSubmit = ref(false);
         const showPassword = ref(false);
+
+        const authStore = useAuthStore();
+        const errorMessage = ref<string | null>(null);
 
         const togglePasswordVisibility = () => {
             showPassword.value = !showPassword.value;
@@ -144,49 +149,20 @@ export default defineComponent({
             attemptedSubmit.value = true;
             errors.value = {};
 
-            if (password.value !== confirmPassword.value) {
-                errors.value.password = "Les mots de passe ne correspondent pas";
-                return;
-            }
-            if (!terms.value) {
-                errors.value.terms = "Vous devez accepter les conditions générales d'utilisation";
-                return;
+            await authStore.register(pseudo.value, email.value, niveauRevision.value, password.value, confirmPassword.value, terms.value);
+
+            // Récupérer les messages d'erreur du store
+            if (authStore.errorMessage) {
+                errorMessage.value = authStore.errorMessage;
             }
 
-            try {
-                const response = await axios.post<RegisterResponse>('/create-user', {
-                    name: pseudo.value,
-                    email: email.value,
-                    niveau: niveau.value,
-                    password: password.value,
-                    password_confirmation: confirmPassword.value
-                });
-
-                if (response.status === 201) {
-                    console.log("Inscription réussie !");
-                    const token = response.data.token;
-                    localStorage.setItem('access_token', token);
-                    router.push('/');
-                }
-            } catch (error: any) {
-                if (error.response && error.response.data) {
-                    console.log(error.response.data);
-                    if (error.response.status === 409) {
-                        errors.value.email = "Cet email est déjà utilisé.";
-                    } else if (error.response.status === 422) {
-                        const validationErrors: ValidationErrors = error.response.data.errors;
-                        if (validationErrors.email) {
-                            errors.value.email = validationErrors.email[0];
-                        }
-                        if (validationErrors.password) {
-                            errors.value.password = validationErrors.password[0];
-                        }
-                    } else {
-                        alert("Erreur lors de l'inscription : " + (error.response.data.message || ''));
+            // Récupérer les erreurs de validation spécifiques
+            if (authStore.validationErrors) {
+                const validationErrors = authStore.validationErrors;
+                for (const key in validationErrors) {
+                    if (Object.prototype.hasOwnProperty.call(validationErrors, key)) {
+                        errors.value[key] = validationErrors[key];
                     }
-                } else {
-                    console.log(error);
-                    alert("Erreur interne du serveur !");
                 }
             }
         };
@@ -194,7 +170,7 @@ export default defineComponent({
         return {
             pseudo,
             email,
-            niveau,
+            niveauRevision,
             password,
             confirmPassword,
             terms,
@@ -203,10 +179,12 @@ export default defineComponent({
             showPassword,
             togglePasswordVisibility,
             register,
+            errorMessage,
             router
         };
     }
 });
 </script>
+
 
 <style></style>

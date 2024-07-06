@@ -2,21 +2,97 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import axios from '@/modules/axios';
 import { useRouter } from 'vue-router';
+import type { User } from '@/models/User';
 
 export const useAuthStore = defineStore('auth', () => {
     const router = useRouter();
     const isAuthenticated = ref(false);
-    const user = ref<{ name?: string; email?: string } | null>(null);
+    const user = ref<User | null>(null);
     const errorMessage = ref<string | null>(null);
+    const validationErrors = ref<{ [key: string]: string }>({});
     const successMessage = ref<string | null>(null);
+
+    async function fetchUser() {
+        try {
+            const token = localStorage.getItem('access_token');
+            const response = await axios.get<User>('/user', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            user.value = response.data;
+        } catch (error) {
+            console.error('Échec de la récupération des données utilisateur:', error);
+        }
+    }
+
+    async function register(pseudo: string, email: string, niveauRevision: string, password: string, confirmPassword: string, terms: boolean) {
+        try {
+            errorMessage.value = null;
+            validationErrors.value = {};
+
+            if (password !== confirmPassword) {
+                validationErrors.value.password = "Les mots de passe ne correspondent pas";
+                return;
+            }
+            if (!terms) {
+                validationErrors.value.terms = "Vous devez accepter les conditions générales d'utilisation";
+                return;
+            }
+
+            const response = await axios.post('/create-user', {
+                pseudo,
+                email,
+                niveauRevision,
+                password,
+                password_confirmation: confirmPassword
+            });
+
+            if (response.status === 201) {
+                console.log("Inscription réussie !");
+                const token = response.data.token;
+                localStorage.setItem('access_token', token);
+
+                // Fetch user data after registration
+                await fetchUser();
+
+                isAuthenticated.value = true;
+                router.push('/');
+            }
+        } catch (error: any) {
+            if (error.response && error.response.data) {
+                console.log(error.response.data);
+                if (error.response.status === 409) {
+                    validationErrors.value.email = "Cet email est déjà utilisé.";
+                } else if (error.response.status === 422) {
+                    const validationErrorsData = error.response.data.errors;
+                    for (const key in validationErrorsData) {
+                        if (Object.prototype.hasOwnProperty.call(validationErrorsData, key)) {
+                            validationErrors.value[key] = validationErrorsData[key][0];
+                        }
+                    }
+                } else {
+                    errorMessage.value = "Erreur lors de l'inscription : " + (error.response.data.message || '');
+                }
+            } else {
+                console.log(error);
+                errorMessage.value = "Erreur interne du serveur !";
+            }
+        }
+    }
 
     async function login(email: string, password: string) {
         try {
             const response = await axios.post('/login', { email, password });
             const token = response.data.token;
-            // const userData = response.data.user;
+
             localStorage.setItem('access_token', token);
-            errorMessage.value = null; // Vide le message d'erreur
+            errorMessage.value = null;
+
+            await fetchUser();
+
+            isAuthenticated.value = true;
+
             router.push('/'); // Rediriger vers la page d'accueil
         } catch (error: any) {
             if (error.response && error.response.status === 401) {
@@ -76,8 +152,6 @@ export const useAuthStore = defineStore('auth', () => {
         const token = localStorage.getItem('access_token');
         if (token) {
             isAuthenticated.value = true;
-            // Optionally, fetch and set the user data here
-            // Example: user.value = { name: 'John Doe', email: 'john@example.com' };
         } else {
             isAuthenticated.value = false;
         }
@@ -90,7 +164,6 @@ export const useAuthStore = defineStore('auth', () => {
     function clearSuccess() {
         successMessage.value = null;
     }
-
-    return { isAuthenticated, user, errorMessage, successMessage, login, forgotPassword, resetPassword, logout, checkAuth, clearError, clearSuccess };
+    return { isAuthenticated, user, errorMessage, validationErrors, successMessage, login, register, forgotPassword, resetPassword, logout, checkAuth, clearError, clearSuccess, fetchUser };
 });
 
