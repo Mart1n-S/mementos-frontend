@@ -38,8 +38,11 @@
                 <h2 class="mb-4 text-[28px] font-bold">Prêt à démarrer?</h2>
                 <p class="mb-6 text-[18px]">Inscris-toi dès maintenant pour explorer toutes les fonctionnalités et
                     commencer ton apprentissage!</p>
-                <button
-                    class="w-full btn btn-primary px-4 py-2 rounded-[3px] text-[20px] text-white font-semibold h-[49px] bg-[#2698E2] md:hover:bg-[#46a9ef] md:w-4/12">Commencer</button>
+                <RouterLink to="/inscription">
+                    <button
+                        class="w-full btn btn-primary px-4 py-2 rounded-[3px] text-[20px] text-white font-semibold h-[49px] bg-[#2698E2] md:hover:bg-[#46a9ef] md:w-4/12">
+                        Commencer</button>
+                </RouterLink>
             </div>
         </div>
     </section>

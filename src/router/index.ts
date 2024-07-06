@@ -29,6 +29,12 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/profil/update',
+      name: 'modifier-profil',
+      component: () => import('@/views/UpdateUserView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/reset-password',
       name: 'reset-password',
       component: () => import('@/views/RequestResetPasswordView.vue'),

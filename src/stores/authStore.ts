@@ -58,7 +58,7 @@ export const useAuthStore = defineStore('auth', () => {
                 await fetchUser();
 
                 isAuthenticated.value = true;
-                router.push('/');
+                router.push('/profil');
             }
         } catch (error: any) {
             if (error.response && error.response.data) {
@@ -94,7 +94,7 @@ export const useAuthStore = defineStore('auth', () => {
 
             isAuthenticated.value = true;
 
-            router.push('/'); // Rediriger vers la page d'accueil
+            router.push('/profil');
         } catch (error: any) {
             if (error.response && error.response.status === 401) {
                 errorMessage.value = 'Oops! Les identifiants sont incorrects.';
