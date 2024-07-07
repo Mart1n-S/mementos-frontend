@@ -6,7 +6,7 @@
                 <label for="pseudo" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Pseudo</label>
                 <input type="text" id="pseudo" name="pseudo"
                     class="block w-full p-4 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Pseudo" required v-model="pseudo">
+                    placeholder="Pseudo" required v-model="pseudo" minlength="2" maxlength="20">
                 <p v-if="errors.pseudo" class="mt-2 text-sm text-red-600 dark:text-red-500">
                     <span class="font-medium">Oops!</span> {{ errors.pseudo }}
                 </p>

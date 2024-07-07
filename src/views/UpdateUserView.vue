@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import ResetPasswordForm from '@/components/ResetPasswordForm.vue';
+import UpdateUserForm from '@/components/UpdateUserForm.vue';
 import FooterComponent from '@/components/FooterComponent.vue';
 import BackButton from '@/components/BackButton.vue';
+
 </script>
 
 <template>
@@ -11,7 +12,7 @@ import BackButton from '@/components/BackButton.vue';
                 <div class="flex flex-col items-center justify-center p-4 py-10 text-center text-white">
                     <BackButton />
                 </div>
-                <ResetPasswordForm />
+                <UpdateUserForm />
             </div>
         </section>
     </main>
