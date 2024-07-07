@@ -3,11 +3,11 @@
         <!-- Squelette de chargement pour l'image -->
         <div v-if="!imageLoaded" class="object-cover w-full h-64 bg-gray-300 shadow-lg animate-pulse"></div>
         <!-- Image réelle -->
-        <img v-show="imageLoaded" :src="imageSrc" alt="Category Image" class="object-cover w-full h-64 shadow-lg"
+        <img v-show="imageLoaded" :src="fullImagePath" alt="Category Image" class="object-cover w-full h-64 shadow-lg"
             @load="imageLoaded = true" />
-        <button :style="{ backgroundColor: buttonColor }"
+        <button :style="{ backgroundColor: categorie.couleur }"
             class="absolute bottom-0 left-0 flex items-center justify-between w-full px-4 py-2 text-lg font-semibold text-white">
-            {{ title }}
+            {{ categorie.nom }}
             <span class="material-icons">
                 <svg width="35" height="35" fill="#ffffff" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path
@@ -19,31 +19,25 @@
     </div>
 </template>
 
-
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, computed, ref } from 'vue';
+import type { Categorie } from '@/models/Categorie';
 
 export default defineComponent({
     props: {
-        imageSrc: {
-            type: String,
-            required: true
-        },
-        title: {
-            type: String,
-            required: true
-        },
-        buttonColor: {
-            type: String,
+        categorie: {
+            type: Object as () => Categorie,
             required: true
         }
     },
     setup(props) {
         const imageLoaded = ref(false);
+        const fullImagePath = computed(() => `src/assets/images/${props.categorie.pathImage}`);
 
         return {
             imageLoaded,
-            ...props
+            fullImagePath,
+            props
         };
     }
 });
