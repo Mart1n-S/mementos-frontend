@@ -11,12 +11,15 @@
           <SearchBar :modelValue="searchQuery" @update:modelValue="searchQuery = $event" />
         </div>
 
-        <div class="py-10 bg-white rounded-t-3xl">
+        <div class="min-h-screen py-10 bg-white rounded-t-3xl">
           <div class="container px-4 mx-auto text-center sm:px-6">
-            <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
-              <CategorieItem v-for="category in filteredCategories" :key="category.title" :imageSrc="category.imageSrc"
-                :title="category.title" :buttonColor="category.buttonColor"
-                @click="navigateToCategory(category.title)" />
+
+            <div v-if="filteredCategories.length > 0" class="grid grid-cols-1 gap-8 md:grid-cols-2">
+              <CategorieItem v-for="category in filteredCategories" :key="category.id" :categorie="category"
+                @click="navigateToCategory(category.nom)" />
+            </div>
+            <div v-else class="col-span-1 text-2xl font-bold text-gray-700 md:col-span-2">
+              <p>Aucune catégorie trouvée.</p>
             </div>
           </div>
         </div>
@@ -27,31 +30,36 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import FooterComponent from '@/components/FooterComponent.vue';
 import CategorieItem from '@/components/CategorieItem.vue';
 import SearchBar from '@/components/SearchBar.vue';
 import BackButton from '@/components/BackButton.vue';
+import { useCategorieStore } from '@/stores/categorieStore';
 
-// Liste des catégories
-const categories = ref([
-  { imageSrc: 'src/assets/images/histoire.jpg', title: 'Histoire', buttonColor: '#A88DFF' },
-  { imageSrc: 'src/assets/images/programmation.jpg', title: 'Programmation', buttonColor: '#EFD81D' },
-  { imageSrc: 'src/assets/images/anglais.jpg', title: 'Anglais', buttonColor: '#6ED3EA' },
-  { imageSrc: 'src/assets/images/pays.jpg', title: 'Pays', buttonColor: '#50db4d' },
-]);
+// Utilisation du store des catégories
+const categorieStore = useCategorieStore();
 
 // Modèle pour la barre de recherche
 const searchQuery = ref('');
 
+// État de chargement
+const isLoading = ref(true);
+
+// Récupérer les catégories au montage du composant
+onMounted(async () => {
+  await categorieStore.fetchCategories();
+  isLoading.value = false;
+});
+
 // Calcul des catégories filtrées
 const filteredCategories = computed(() => {
   if (!searchQuery.value) {
-    return categories.value;
+    return categorieStore.categories;
   }
-  return categories.value.filter(category =>
-    category.title.toLowerCase().includes(searchQuery.value.toLowerCase())
+  return categorieStore.categories.filter(category =>
+    category.nom.toLowerCase().includes(searchQuery.value.toLowerCase())
   );
 });
 
