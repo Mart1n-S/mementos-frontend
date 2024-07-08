@@ -137,7 +137,7 @@ export default defineComponent({
                         <span class="ms-3 text-[20px]">Catégories</span>
                     </RouterLink>
                 </li>
-                <li>
+                <li v-if="authStore.isAuthenticated">
                     <RouterLink to="/mes-themes"
                         class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <svg width="35" height="35"
@@ -153,7 +153,7 @@ export default defineComponent({
                         <span class="ms-3 text-[20px]">Mes thèmes</span>
                     </RouterLink>
                 </li>
-                <li>
+                <li v-if="authStore.isAuthenticated">
                     <RouterLink to="/mes-cartes"
                         class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <svg class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"

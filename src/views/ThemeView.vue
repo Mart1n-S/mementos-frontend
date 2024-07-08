@@ -7,27 +7,16 @@
                     <h1 class="mb-4 text-[50px] font-bold">THEMES</h1>
                     <p class="mb-8 text-[22px]">Retrouve ici tous les thèmes de la catégorie {{ category }}</p>
 
-                    <!-- Barre de recherche -->
                     <SearchBar :modelValue="searchQuery" @update:modelValue="searchQuery = $event" />
                 </div>
 
                 <div class="min-h-screen py-10 bg-white rounded-t-3xl">
                     <div class="container px-4 mx-auto text-center sm:px-6">
-                        <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
-                            <!-- Afficher un message s'il n'y a pas de thèmes pour la catégorie -->
-                            <div v-if="themesForCategory.length === 0"
-                                class="col-span-1 text-2xl font-bold text-gray-700 md:col-span-2">
-                                Aucun thème pour cette catégorie
-                            </div>
-                            <!-- Afficher un message s'il n'y a pas de résultats pour la recherche -->
-                            <div v-else-if="filteredThemes.length === 0"
-                                class="col-span-1 text-2xl font-bold text-gray-700 md:col-span-2">
-                                Aucun résultat
-                            </div>
-
-                            <!-- Afficher les thèmes -->
-                            <ThemeItem v-for="theme in filteredThemes" :key="theme.title" :title="theme.title"
-                                :buttonColor="theme.buttonColor" />
+                        <div v-if="filteredThemes.length > 0" class="grid grid-cols-1 gap-8 md:grid-cols-2">
+                            <ThemeItem v-for="theme in filteredThemes" :key="theme.id" :theme="theme" />
+                        </div>
+                        <div v-else class="col-span-1 text-2xl font-bold text-gray-700 md:col-span-2">
+                            <p>Aucun thème pour cette catégorie</p>
                         </div>
                     </div>
                 </div>
@@ -38,13 +27,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import FooterComponent from '@/components/FooterComponent.vue';
 import SearchBar from '@/components/SearchBar.vue';
 import ThemeItem from '@/components/ThemeItem.vue';
 import BackButton from '@/components/BackButton.vue';
+import { useThemeStore } from '@/stores/themeStore';
 
-// Définir les props
 const props = defineProps({
     category: {
         type: String,
@@ -52,29 +41,20 @@ const props = defineProps({
     }
 });
 
-// Exemples de thèmes pour différentes catégories
-const themes = ref([
-    { category: 'Programmation', title: 'Javascript', buttonColor: '#EFD81D' },
-    { category: 'Programmation', title: 'PHP', buttonColor: '#EFD81D' },
-    { category: 'Programmation', title: 'REACT', buttonColor: '#EFD81D' },
-    { category: 'Programmation', title: 'HTML', buttonColor: '#EFD81D' },
-    { category: 'Programmation', title: 'CSS', buttonColor: '#EFD81D' },
-]);
-
-// Modèle pour la barre de recherche
 const searchQuery = ref('');
 
-// Calcul des thèmes filtrés par catégorie
-const themesForCategory = computed(() => {
-    return themes.value.filter(theme =>
-        theme.category.toLowerCase() === props.category.toLowerCase()
-    );
+const themeStore = useThemeStore();
+
+onMounted(async () => {
+    await themeStore.fetchThemesByCategory(props.category);
 });
 
-// Calcul des thèmes filtrés par la recherche
 const filteredThemes = computed(() => {
-    return themesForCategory.value.filter(theme =>
-        theme.title.toLowerCase().includes(searchQuery.value.toLowerCase())
+    if (!searchQuery.value) {
+        return themeStore.themes;
+    }
+    return themeStore.themes.filter(theme =>
+        theme.nom.toLowerCase().includes(searchQuery.value.toLowerCase())
     );
 });
 

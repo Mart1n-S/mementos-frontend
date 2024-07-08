@@ -57,8 +57,7 @@ const router = createRouter({
       path: '/themes/:category',
       name: 'themes',
       component: () => import('@/views/ThemeView.vue'),
-      props: route => ({ category: route.params.category }),
-
+      props: true,
     },
     {
       path: '/cgu',
