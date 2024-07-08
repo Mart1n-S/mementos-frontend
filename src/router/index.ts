@@ -60,6 +60,12 @@ const router = createRouter({
       props: true,
     },
     {
+      path: '/themes/:themeId/preview',
+      name: 'preview',
+      component: () => import('@/views/PreviewCardListView.vue'),
+      props: route => ({ themeId: Number(route.params.themeId) })
+    },
+    {
       path: '/cgu',
       name: 'cgu',
       component: () => import('@/views/CguView.vue')

@@ -4,13 +4,31 @@
             <div class="mt-14">
                 <div class="flex flex-col items-center justify-center p-4 py-10 text-center text-white">
                     <BackButton />
-                    <h1 class="mb-4 text-[50px] font-bold">THEMES</h1>
-                    <p class="mb-8 text-[22px]">Retrouve ici tous les thèmes de la catégorie {{ category }}</p>
-                    <SearchBar :modelValue="searchQuery" @update:modelValue="searchQuery = $event" />
+                    <h1 class="mb-4 text-[50px] font-bold" v-if="theme">{{ theme.nom }}</h1>
+                    <p class="mb-8 text-[24px] underline" v-if="theme">Auteur : {{ theme.user.pseudo }}</p>
+                    <div class="flex flex-col w-full space-y-4 md:w-4/12">
+                        <button
+                            class="btn btn-primary px-4 py-2 rounded-[3px] text-[20px] text-white font-semibold h-[49px] bg-[#2698E2] md:hover:bg-[#46a9ef]">
+                            Réviser
+                        </button>
+                        <button
+                            class="btn btn-secondary px-4 py-2 rounded-[3px] text-[20px] text-white font-semibold h-[49px] bg-[#FF4F79] md:hover:bg-[#ff3c87]">
+                            Dupliquer
+                        </button>
+                    </div>
                 </div>
 
                 <div class="min-h-screen py-10 bg-white rounded-t-3xl">
                     <div class="container px-4 mx-auto text-center sm:px-6">
+                        <h2 class="mb-4 text-[28px] font-bold" v-if="theme">Aperçu des cartes</h2>
+                        <p class="mb-6 text-[18px]" v-if="theme">
+                            Avant de te lancer dans la révision, regarde si le thème correspond bien à ce que tu veux
+                            réviser. Tu peux dupliquer le thème pour l’adapter à tes besoins.
+                        </p>
+                        <div class="grid grid-cols-1 gap-8" v-if="theme">
+                            <CardList v-for="card in cards" :key="card.id" :question="card.question"
+                                :color="theme.couleur ?? '#2698E2'" :reponse="card.reponse" />
+                        </div>
                         <div v-if="isLoading" role="status" class="text-center">
                             <svg aria-hidden="true"
                                 class="inline w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-green-500"
@@ -24,14 +42,6 @@
                             </svg>
                             <span class="sr-only">Loading...</span>
                         </div>
-                        <div v-else>
-                            <div v-if="filteredThemes.length > 0" class="grid grid-cols-1 gap-8 md:grid-cols-2">
-                                <ThemeItem v-for="theme in filteredThemes" :key="theme.id" :theme="theme" />
-                            </div>
-                            <div v-else class="col-span-1 text-2xl font-bold text-gray-700 md:col-span-2">
-                                <p>Aucun thème pour cette catégorie</p>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -41,37 +51,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import FooterComponent from '@/components/FooterComponent.vue';
-import SearchBar from '@/components/SearchBar.vue';
-import ThemeItem from '@/components/ThemeItem.vue';
+import { ref, onMounted, computed } from 'vue';
+import { useCardStore } from '@/stores/cardStore';
+import CardList from '@/components/CardList.vue';
 import BackButton from '@/components/BackButton.vue';
-import { useThemeStore } from '@/stores/themeStore';
+import FooterComponent from '@/components/FooterComponent.vue';
 
-const props = defineProps({
-    category: {
-        type: String,
-        required: true
-    }
-});
+// Accept themeId as prop
+const props = defineProps<{ themeId: number }>();
 
-const searchQuery = ref('');
-
-const themeStore = useThemeStore();
+const cardStore = useCardStore();
 const isLoading = ref(true);
 
-onMounted(async () => {
-    await themeStore.fetchThemesByCategory(props.category);
-    isLoading.value = false;
-});
+const cards = computed(() => cardStore.cards);
+const theme = computed(() => cards.value.length > 0 ? cards.value[0].theme : null);
 
-const filteredThemes = computed(() => {
-    if (!searchQuery.value) {
-        return themeStore.themes;
-    }
-    return themeStore.themes.filter(theme =>
-        theme.nom.toLowerCase().includes(searchQuery.value.toLowerCase())
-    );
+onMounted(async () => {
+    await cardStore.fetchCardsByTheme(props.themeId);
+    isLoading.value = false;
 });
 </script>
 

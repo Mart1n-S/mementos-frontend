@@ -1,6 +1,6 @@
 <template>
     <div class="relative w-full max-w-md">
-        <input :value="modelValue" @input="updateValue" type="text" placeholder="Rechercher"
+        <input :value="modelValue" @input="updateValue" type="text" placeholder="Rechercher" id="search" name="search"
             class="w-full py-2 pl-12 pr-4 text-gray-900 rounded-md focus:outline-none focus:ring focus:border-blue-300" />
 
         <svg class="absolute transform -translate-y-1/2 left-3 top-1/2" width="24" height="24" fill="none"

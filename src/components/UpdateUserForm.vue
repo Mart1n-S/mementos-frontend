@@ -31,13 +31,14 @@
             </div>
             <div class="mb-6">
                 <label for="pseudo" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Pseudo</label>
-                <input v-model="form.pseudo" type="text" id="pseudo" minlength="2" maxlength="20"
+                <input v-model="form.pseudo" type="text" name="pseudo" id="pseudo" minlength="2" maxlength="20"
                     class="block w-full p-4 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500" />
             </div>
             <div class="mb-6">
                 <label for="niveauRevision" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Niveau
                     de révision</label>
-                <input v-model="form.niveauRevision" type="number" id="niveauRevision" step="1" min="1" max="7"
+                <input v-model="form.niveauRevision" type="number" name="niveauRevision" id="niveauRevision" step="1"
+                    min="1" max="7"
                     class="block w-full p-4 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500" />
             </div>
             <div class="flex p-4 mb-4 text-sm text-blue-800 bg-yellow-100 rounded-lg dark:bg-gray-800 dark:text-blue-400"
