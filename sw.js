@@ -59,6 +59,10 @@ self.addEventListener('activate', function (event) {
 
 // Intercepter les requêtes réseau et servir les ressources depuis le cache
 self.addEventListener('fetch', function (event) {
+  if (event.request.method !== 'GET') {
+    return
+  }
+
   if (event.request.url.startsWith('http')) {
     if (event.request.url.includes('/categories')) {
       event.respondWith(

@@ -1,8 +1,8 @@
 <template>
     <div class="relative">
-        <button :style="{ backgroundColor: buttonColor }"
+        <button @click="goToPreview" :style="{ backgroundColor: theme.couleur }"
             class="flex items-center justify-between w-full btn px-4 py-2 text-[20px] font-semibold text-white rounded-[3px] h-[49px]">
-            {{ title }}
+            {{ theme.nom }}
             <span class="material-icons">
                 <svg width="30" height="30" fill="#ffffff" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path
@@ -16,25 +16,29 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { useRouter } from 'vue-router';
+import type { Theme } from '@/models/Theme';
 
 export default defineComponent({
     props: {
-        title: {
-            type: String,
-            required: true
-        },
-        buttonColor: {
-            type: String,
+        theme: {
+            type: Object as () => Theme,
             required: true
         }
     },
     setup(props) {
+        const router = useRouter();
+
+        function goToPreview() {
+            router.push(`/themes/${props.theme.id}/preview`);
+        }
+
         return {
+            goToPreview,
             ...props
         };
     }
 });
-
 </script>
 
 <style scoped></style>
