@@ -48,6 +48,7 @@ import { useAuthStore } from '@/stores/authStore';
 import BackButton from '@/components/BackButton.vue';
 import SearchBar from '@/components/SearchBar.vue';
 import ThemeItem from '@/components/ThemeItem.vue';
+import { useRouter } from 'vue-router';
 import FooterComponent from '@/components/FooterComponent.vue';
 import type { Theme } from '@/models/Theme';
 
@@ -56,6 +57,7 @@ const authStore = useAuthStore();
 
 const searchQuery = ref('');
 const isLoading = ref(true);
+const router = useRouter();
 
 const filteredThemes = computed(() => {
     return themeStore.themes.filter(theme =>
@@ -64,7 +66,7 @@ const filteredThemes = computed(() => {
 });
 
 function handleThemeClick(theme: Theme) {
-    console.log('Theme clicked:', theme);
+    router.push(`/mes-themes/gestion/${theme.id}`);
 }
 
 onMounted(async () => {

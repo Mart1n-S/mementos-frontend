@@ -41,6 +41,13 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/mes-themes/gestion/:themeId',
+      name: 'ThemeManagement',
+      component: () => import('@/views/CrudCartesView.vue'),
+      props: true,
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/profil/update',
       name: 'modifier-profil',
       component: () => import('@/views/UpdateUserView.vue'),

@@ -17,6 +17,26 @@ export const useCardStore = defineStore('card', () => {
         }
     }
 
-    return { cards, errorMessage, fetchCardsByTheme };
+    async function fetchCardsOfUser(themeId: string) {
+        try {
+            const token = localStorage.getItem('access_token');
+            const response = await axios.get<Carte[]>(`/cartes/${themeId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            cards.value = response.data;
+            errorMessage.value = null;
+        } catch (error: any) {
+            if (error.response && error.response.status === 403) {
+                errorMessage.value = 'Accès non autorisé';
+            } else {
+                errorMessage.value = 'Erreur lors de la récupération des cartes';
+            }
+            console.error('Erreur lors de la récupération des cartes:', error);
+        }
+    }
+
+    return { cards, errorMessage, fetchCardsByTheme, fetchCardsOfUser };
 });
 
