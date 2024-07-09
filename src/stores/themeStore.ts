@@ -17,5 +17,20 @@ export const useThemeStore = defineStore('theme', () => {
         }
     }
 
-    return { themes, errorMessage, fetchThemesByCategory };
+    async function fetchUserThemes(userId: number) {
+        try {
+            const token = localStorage.getItem('access_token');
+            const response = await axios.get<Theme[]>(`/user/${userId}/themes`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            themes.value = response.data;
+        } catch (error: any) {
+            errorMessage.value = 'Erreur lors de la récupération des thèmes de l\'utilisateur';
+            console.error('Erreur lors de la récupération des thèmes de l\'utilisateur:', error);
+        }
+    }
+
+    return { themes, errorMessage, fetchThemesByCategory, fetchUserThemes };
 });

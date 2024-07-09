@@ -140,22 +140,6 @@ export default defineComponent({
                 <li v-if="authStore.isAuthenticated">
                     <RouterLink to="/mes-themes"
                         class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-                        <svg width="35" height="35"
-                            class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
-                            fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path
-                                d="M17.25 6.75H3.75a1.5 1.5 0 0 0-1.5 1.5v10.5a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5V8.25a1.5 1.5 0 0 0-1.5-1.5Z">
-                            </path>
-                            <path
-                                d="M20.25 3.75H6a.75.75 0 0 0 0 1.5h14.25V16.5a.75.75 0 1 0 1.5 0V5.25a1.5 1.5 0 0 0-1.5-1.5Z">
-                            </path>
-                        </svg>
-                        <span class="ms-3 text-[20px]">Mes thèmes</span>
-                    </RouterLink>
-                </li>
-                <li v-if="authStore.isAuthenticated">
-                    <RouterLink to="/mes-cartes"
-                        class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <svg class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
                             width="25" height="36" viewBox="0 0 21 32" fill="currentColor"
                             xmlns="http://www.w3.org/2000/svg">
@@ -171,9 +155,7 @@ export default defineComponent({
                                 d="M11.013 8.67704C10.726 9.21565 9.95458 9.21645 9.66871 8.67844V8.67844C9.3994 8.17158 9.76758 7.55931 10.342 7.55872V7.55872C10.9165 7.55812 11.2834 8.16963 11.013 8.67704V8.67704Z"
                                 fill="white" />
                         </svg>
-
-
-                        <span class="ms-3 text-[20px]">Mes cartes</span>
+                        <span class="ms-3 text-[20px]">Mes thèmes</span>
                     </RouterLink>
                 </li>
             </ul>
