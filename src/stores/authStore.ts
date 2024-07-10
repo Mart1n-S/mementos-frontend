@@ -12,6 +12,9 @@ export const useAuthStore = defineStore('auth', () => {
     const validationErrors = ref<{ [key: string]: string }>({});
     const successMessage = ref<string | null>(null);
 
+    /**
+     * Récupère les données de l'utilisateur
+     */
     async function fetchUser() {
         try {
             const token = localStorage.getItem('access_token');
@@ -27,6 +30,16 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
+    /**
+     * Enregistre un nouvel utilisateur
+     * @param pseudo 
+     * @param email 
+     * @param niveauRevision 
+     * @param password 
+     * @param confirmPassword 
+     * @param terms 
+     * @returns 
+     */
     async function register(pseudo: string, email: string, niveauRevision: string, password: string, confirmPassword: string, terms: boolean) {
         try {
             errorMessage.value = null;
@@ -82,6 +95,11 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
+    /**
+     * Envoie les informations de connexion
+     * @param email 
+     * @param password 
+     */
     async function login(email: string, password: string) {
         try {
             const response = await axios.post('/login', { email, password });
@@ -104,6 +122,10 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
+    /**
+     * Envoie une demande de réinitialisation de mot de passe
+     * @param email 
+     */
     async function forgotPassword(email: string) {
         try {
             await axios.post('/forgot-password', { email });
@@ -115,6 +137,13 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
+    /**
+     * Réinitialise le mot de passe
+     * @param token 
+     * @param email 
+     * @param password 
+     * @param passwordConfirmation 
+     */
     async function resetPassword(token: string, email: string, password: string, passwordConfirmation: string) {
         try {
             await axios.post('/reset-password', {
@@ -132,6 +161,9 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
+    /**
+     * Déconnecte l'utilisateur
+     */
     async function logout() {
         try {
             const token = localStorage.getItem('access_token');
@@ -150,6 +182,9 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
+    /**
+     * Charge l'utilisateur depuis le stockage local
+     */
     function loadUserFromLocalStorage() {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
@@ -161,6 +196,9 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
+    /**
+     * Vérifie l'état d'authentification
+     */
     function checkAuth() {
         const token = localStorage.getItem('access_token');
         if (token) {
@@ -170,13 +208,17 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
-
-
+    /**
+     * Efface les messages d'erreur
+     */
     function clearError() {
         errorMessage.value = null;
         validationErrors.value = {};
     }
 
+    /**
+     * Efface les messages de succès
+     */
     function clearSuccess() {
         successMessage.value = null;
     }

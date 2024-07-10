@@ -1,9 +1,9 @@
 const CACHE_NAME = `mementos-ressources-api-v${new Date().getTime()}`
 const urlsToCache = [
   '/',
-  '/index.html',
-  '/src/index.css',
-  '/src/main.ts',
+  // '/index.html',
+  // '/src/index.css',
+  // '/src/main.ts',
   '/src/assets/images/histoire.jpg',
   '/src/assets/images/programmation.jpg',
   '/src/assets/images/anglais.jpg',

@@ -1,6 +1,6 @@
 <template>
     <div class="relative">
-        <button @click="goToPreview" :style="{ backgroundColor: theme.couleur }"
+        <button @click="handleClick" :style="{ backgroundColor: theme.couleur }"
             class="flex items-center justify-between w-full btn px-4 py-2 text-[20px] font-semibold text-white rounded-[3px] h-[49px]">
             {{ theme.nom }}
             <span class="material-icons">
@@ -15,27 +15,34 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, type PropType } from 'vue';
 import { useRouter } from 'vue-router';
 import type { Theme } from '@/models/Theme';
 
 export default defineComponent({
     props: {
         theme: {
-            type: Object as () => Theme,
+            type: Object as PropType<Theme>,
             required: true
+        },
+        onClick: {
+            type: Function as PropType<(theme: Theme) => void>,
+            required: false
         }
     },
     setup(props) {
         const router = useRouter();
 
-        function goToPreview() {
-            router.push(`/themes/${props.theme.id}/preview`);
+        function handleClick() {
+            if (props.onClick) {
+                props.onClick(props.theme);
+            } else {
+                router.push(`/themes/${props.theme.id}/preview`);
+            }
         }
 
         return {
-            goToPreview,
-            ...props
+            handleClick
         };
     }
 });
