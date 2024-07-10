@@ -1,6 +1,6 @@
 <template>
     <div v-if="isVisible" tabindex="-1" aria-hidden="true"
-        class="fixed top-0 right-0 left-0 z-50 flex justify-center items-center bg-[#80808070] w-full h-[calc(100%-1rem)] max-h-full overflow-y-auto overflow-x-hidden">
+        class="fixed top-0 right-0 left-0 z-50 flex justify-center items-center bg-[#80808070] min-h-screen w-full h-[calc(100%-1rem)] max-h-full overflow-y-auto overflow-x-hidden">
         <div class="relative w-full max-w-2xl max-h-full p-4">
             <!-- Modal content -->
             <div class="relative p-4 bg-white rounded-lg shadow dark:bg-gray-800 sm:p-5">

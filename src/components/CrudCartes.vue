@@ -42,7 +42,7 @@
             </div>
             <!-- End block -->
             <!-- Add modal -->
-            <ModalCrud :isVisible="isCreateModalVisible" @close="closeCreateModal" />
+            <CreateCrud :isVisible="isCreateModalVisible" @close="closeCreateModal" />
             <!-- Update modal -->
             <UpdateCrud :isVisible="isUpdateModalVisible" :card="selectedCard" @close="closeUpdateModal" />
             <!-- Read modal -->
@@ -57,7 +57,7 @@
 <script lang="ts">
 import { defineComponent, ref, computed, watch } from 'vue';
 import { useCardStore } from '@/stores/cardStore';
-import ModalCrud from '@/components/ModalCrud.vue';
+import CreateCrud from '@/components/CreateCrud.vue';
 import ListCrud from '@/components/ListCrud.vue';
 import ShowCrud from '@/components/ShowCrud.vue';
 import DeleteCrud from '@/components/DeleteCrud.vue';
@@ -67,7 +67,7 @@ import type { Carte } from '@/models/Carte';
 
 export default defineComponent({
     components: {
-        ModalCrud,
+        CreateCrud,
         ListCrud,
         ShowCrud,
         DeleteCrud,
