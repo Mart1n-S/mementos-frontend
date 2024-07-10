@@ -9,10 +9,10 @@
             </tr>
         </thead>
         <tbody>
-            <tr v-for="card in cards" :key="card.id" class="border-b dark:border-gray-700">
+            <tr v-for="(card, index) in cards" :key="card.id" class="border-b dark:border-gray-700">
                 <th scope="row"
                     class="px-4 py-3 font-medium text-center text-gray-900 whitespace-nowrap dark:text-white">
-                    {{ card.id }}
+                    {{ index + 1 }}
                 </th>
                 <td class="px-4 py-3 text-center truncate max-w-[150px] sm:max-w-xs">{{ card.question }}</td>
                 <td class="px-4 py-3 text-center truncate max-w-[150px] sm:max-w-xs">{{ card.reponse }}</td>

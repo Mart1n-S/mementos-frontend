@@ -25,7 +25,6 @@
                     élément ? Cela
                     est définitif.</p>
                 <div class="flex items-center justify-center space-x-4">
-
                     <button @click="closeModal" type="button" class="btn btn-primary px-4 py-2 rounded-[3px] text-[18px] text-gray-500 font-semibold h-[49px] bg-white
                     border border-gray-200
                     md:hover:bg-gray-100">Annuler</button>
@@ -39,6 +38,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
+import { useCardStore } from '@/stores/cardStore';
 import type { PropType } from 'vue';
 
 export default defineComponent({
@@ -52,17 +52,25 @@ export default defineComponent({
             default: null
         }
     },
-    methods: {
-        closeModal() {
-            this.$emit('close');
-        },
-        confirmDelete() {
-            if (this.cardId !== null) {
-                console.log(`Delete card with ID: ${this.cardId}`);
-                // Call  delete API here
-                this.$emit('confirm-delete', this.cardId);
+    setup(props, { emit }) {
+        const cardStore = useCardStore();
+
+        const closeModal = () => {
+            emit('close');
+        };
+
+        const confirmDelete = async () => {
+            if (props.cardId !== null) {
+                await cardStore.deleteCard(props.cardId);
+                emit('confirm-delete', props.cardId);
+                closeModal();
             }
-        }
+        };
+
+        return {
+            closeModal,
+            confirmDelete
+        };
     }
 });
 </script>

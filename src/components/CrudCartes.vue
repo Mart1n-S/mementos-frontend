@@ -14,8 +14,7 @@
                         </div>
                         <div
                             class="flex flex-col items-stretch justify-end flex-shrink-0 w-full space-y-2 md:w-auto md:flex-row md:space-y-0 md:items-center md:space-x-3">
-                            <button type="button" id="createProductModalButton" data-modal-target="createProductModal"
-                                data-modal-toggle="createProductModal"
+                            <button type="button" id="createProductModalButton" @click="openCreateModal"
                                 class="btn btn-primary px-4 py-2 rounded-[3px] text-[20px] text-white font-semibold h-[49px] bg-[#2698E2] md:hover:bg-[#46a9ef]">
                                 Ajouter
                             </button>
@@ -43,7 +42,7 @@
             </div>
             <!-- End block -->
             <!-- Add modal -->
-            <ModalCrud />
+            <ModalCrud :isVisible="isCreateModalVisible" @close="closeCreateModal" />
             <!-- Update modal -->
             <UpdateCrud :isVisible="isUpdateModalVisible" :card="selectedCard" @close="closeUpdateModal"
                 @save="saveUpdatedCard" />
@@ -51,7 +50,7 @@
             <ShowCrud :card="selectedCard" :isVisible="isShowModalVisible" @close="isShowModalVisible = false" />
             <!-- Delete modal -->
             <DeleteCrud :isVisible="isDeleteModalVisible" :cardId="selectedCardId" @close="isDeleteModalVisible = false"
-                @confirmDelete="confirmDeleteCard" />
+                @confirm-delete="fetchCards" />
         </div>
     </div>
 </template>
@@ -88,6 +87,7 @@ export default defineComponent({
         const isShowModalVisible = ref(false);
         const isDeleteModalVisible = ref(false);
         const isUpdateModalVisible = ref(false);
+        const isCreateModalVisible = ref(false);
         const selectedCardId = ref<number | null>(null);
         const searchQuery = ref('');
         const isLoading = ref(true);
@@ -107,14 +107,16 @@ export default defineComponent({
             isDeleteModalVisible.value = true;
         };
 
-        const closeUpdateModal = () => {
-            isUpdateModalVisible.value = false;
+        const openCreateModal = () => {
+            isCreateModalVisible.value = true;
         };
 
-        const confirmDeleteCard = (cardId: number) => {
-            console.log(`Deleting card with ID: ${cardId}`);
-            isDeleteModalVisible.value = false;
-            cardStore.cards = cardStore.cards.filter(card => card.id !== cardId);
+        const closeCreateModal = () => {
+            isCreateModalVisible.value = false;
+        };
+
+        const closeUpdateModal = () => {
+            isUpdateModalVisible.value = false;
         };
 
         const saveUpdatedCard = (updatedCard: { id: number, question: string, answer: string }) => {
@@ -153,17 +155,20 @@ export default defineComponent({
             isShowModalVisible,
             isDeleteModalVisible,
             isUpdateModalVisible,
+            isCreateModalVisible,
             selectedCardId,
             searchQuery,
             handleViewCard,
             handleEditCard,
             handleDeleteCard,
             closeUpdateModal,
-            confirmDeleteCard,
+            openCreateModal,
+            closeCreateModal,
             saveUpdatedCard,
             filteredCards,
             isLoading,
-            cardStore
+            cardStore,
+            fetchCards
         };
     }
 });

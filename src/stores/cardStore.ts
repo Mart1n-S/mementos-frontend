@@ -37,6 +37,21 @@ export const useCardStore = defineStore('card', () => {
         }
     }
 
-    return { cards, errorMessage, fetchCardsByTheme, fetchCardsOfUser };
+    async function deleteCard(cardId: number) {
+        try {
+            const token = localStorage.getItem('access_token');
+            await axios.delete(`/cartes/${cardId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            cards.value = cards.value.filter(card => card.id !== cardId);
+        } catch (error: any) {
+            errorMessage.value = 'Erreur lors de la suppression de la carte';
+            console.error('Erreur lors de la suppression de la carte:', error);
+        }
+    }
+
+    return { cards, errorMessage, fetchCardsByTheme, fetchCardsOfUser, deleteCard };
 });
 
