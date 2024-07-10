@@ -12,11 +12,16 @@ const themeId = Array.isArray(route.params.themeId) ? route.params.themeId[0] : 
 const themeStore = useThemeStore();
 const themeName = ref('');
 
-
 onMounted(async () => {
-    await themeStore.fetchThemeById(themeId);
-    if (themeStore.theme) {
-        themeName.value = themeStore.theme.nom;
+    const theme = themeStore.themes.find(t => t.id === parseInt(themeId));
+    if (theme) {
+        themeName.value = theme.nom;
+    } else {
+        // Si le user tape lui-même l'URL, on doit récupérer le thème car pas récupéré par le store précédemment
+        await themeStore.fetchThemeById(themeId);
+        if (themeStore.theme) {
+            themeName.value = themeStore.theme.nom;
+        }
     }
 });
 </script>

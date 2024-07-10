@@ -7,6 +7,10 @@ export const useCardStore = defineStore('card', () => {
     const cards = ref<Carte[]>([]);
     const errorMessage = ref<string | null>(null);
 
+    /**
+     * Récupère les cartes par l'id du thème
+     * @param themeId 
+     */
     async function fetchCardsByTheme(themeId: number) {
         try {
             const response = await axios.get<Carte[]>(`/themes/${themeId}/cards`);
@@ -17,6 +21,10 @@ export const useCardStore = defineStore('card', () => {
         }
     }
 
+    /**
+     * Récupère les cartes de l'utilisateur par l'id du thème
+     * @param themeId 
+     */
     async function fetchCardsOfUser(themeId: string) {
         try {
             const token = localStorage.getItem('access_token');
@@ -37,6 +45,10 @@ export const useCardStore = defineStore('card', () => {
         }
     }
 
+    /**
+     * Supprime une carte de l'utilisateur par son identifiant
+     * @param cardId 
+     */
     async function deleteCard(cardId: number) {
         try {
             const token = localStorage.getItem('access_token');

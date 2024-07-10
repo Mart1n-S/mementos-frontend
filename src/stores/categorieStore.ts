@@ -7,6 +7,9 @@ export const useCategorieStore = defineStore('categorie', () => {
     const categories = ref<Categorie[]>([]);
     const errorMessage = ref<string | null>(null);
 
+    /**
+     * Récupère les catégories publiques
+     */
     async function fetchCategories() {
         try {
             const response = await axios.get<Categorie[]>('/categories');

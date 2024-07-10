@@ -8,6 +8,10 @@ export const useThemeStore = defineStore('theme', () => {
     const theme = ref<Theme | null>(null);
     const errorMessage = ref<string | null>(null);
 
+    /**
+     * Récupère les thèmes publiques par catégorie
+     * @param category 
+     */
     async function fetchThemesByCategory(category: string) {
         try {
             const response = await axios.get<Theme[]>(`/themes/${category}`);
@@ -18,6 +22,10 @@ export const useThemeStore = defineStore('theme', () => {
         }
     }
 
+    /**
+     * Récupère les thèmes de l'utilisateur
+     * @param userId 
+     */
     async function fetchUserThemes(userId: number) {
         try {
             const token = localStorage.getItem('access_token');
@@ -33,6 +41,10 @@ export const useThemeStore = defineStore('theme', () => {
         }
     }
 
+    /**
+     * Récupère un thème par son identifiant
+     * @param themeId 
+     */
     async function fetchThemeById(themeId: string) {
         try {
             const token = localStorage.getItem('access_token');
