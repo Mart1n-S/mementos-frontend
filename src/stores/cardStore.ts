@@ -6,6 +6,7 @@ import type { Carte } from '@/models/Carte';
 export const useCardStore = defineStore('card', () => {
     const cards = ref<Carte[]>([]);
     const errorMessage = ref<string | null>(null);
+    const validationErrors = ref<{ [key: string]: string[] }>({});
 
     /**
      * Récupère les cartes par l'id du thème
@@ -46,6 +47,39 @@ export const useCardStore = defineStore('card', () => {
     }
 
     /**
+     * Met à jour une carte de l'utilisateur 
+     * @param cardId 
+     * @param question
+     * @param reponse 
+     */
+    async function updateCard(cardId: number, question: string, reponse: string) {
+        try {
+            const token = localStorage.getItem('access_token');
+            const response = await axios.put<Carte>(`/cartes/${cardId}`, { question, reponse }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            const index = cards.value.findIndex(card => card.id === cardId);
+            if (index !== -1) {
+                cards.value[index] = response.data;
+            }
+            validationErrors.value = {};
+            errorMessage.value = null;
+        } catch (error: any) {
+            if (error.response && error.response.status === 422) {
+                // console.log("Validation Errors:", error.response.data.messages);
+                validationErrors.value = error.response.data.messages;
+                console.log("Validation Errors:", validationErrors.value);
+            } else {
+                errorMessage.value = 'Erreur lors de la mise à jour de la carte';
+                console.error('Erreur lors de la mise à jour de la carte:', error);
+            }
+        }
+    }
+
+
+    /**
      * Supprime une carte de l'utilisateur par son identifiant
      * @param cardId 
      */
@@ -64,6 +98,6 @@ export const useCardStore = defineStore('card', () => {
         }
     }
 
-    return { cards, errorMessage, fetchCardsByTheme, fetchCardsOfUser, deleteCard };
+    return { cards, errorMessage, validationErrors, fetchCardsByTheme, fetchCardsOfUser, updateCard, deleteCard };
 });
 

@@ -44,8 +44,7 @@
             <!-- Add modal -->
             <ModalCrud :isVisible="isCreateModalVisible" @close="closeCreateModal" />
             <!-- Update modal -->
-            <UpdateCrud :isVisible="isUpdateModalVisible" :card="selectedCard" @close="closeUpdateModal"
-                @save="saveUpdatedCard" />
+            <UpdateCrud :isVisible="isUpdateModalVisible" :card="selectedCard" @close="closeUpdateModal" />
             <!-- Read modal -->
             <ShowCrud :card="selectedCard" :isVisible="isShowModalVisible" @close="isShowModalVisible = false" />
             <!-- Delete modal -->
@@ -119,15 +118,6 @@ export default defineComponent({
             isUpdateModalVisible.value = false;
         };
 
-        const saveUpdatedCard = (updatedCard: { id: number, question: string, answer: string }) => {
-            console.log('Updated card:', updatedCard);
-            const index = cardStore.cards.findIndex(card => card.id === updatedCard.id);
-            if (index !== -1) {
-                cardStore.cards[index].question = updatedCard.question;
-                cardStore.cards[index].reponse = updatedCard.answer;
-            }
-            isUpdateModalVisible.value = false;
-        };
 
         // Calculer les cartes filtrées en fonction de la recherche
         const filteredCards = computed(() => {
@@ -164,7 +154,6 @@ export default defineComponent({
             closeUpdateModal,
             openCreateModal,
             closeCreateModal,
-            saveUpdatedCard,
             filteredCards,
             isLoading,
             cardStore,

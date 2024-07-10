@@ -17,7 +17,7 @@
                 <td class="px-4 py-3 text-center truncate max-w-[150px] sm:max-w-xs">{{ card.question }}</td>
                 <td class="px-4 py-3 text-center truncate max-w-[150px] sm:max-w-xs">{{ card.reponse }}</td>
                 <td class="flex items-center justify-center px-4 py-3">
-                    <button @click="toggleDropdown(card.id)"
+                    <button @click="toggleDropdown(card.id)" :id="`button-action-${card.id}`"
                         class="inline-flex items-center text-sm font-medium md:hover:bg-gray-100 dark:hover:bg-gray-700 p-1.5 dark:hover-bg-gray-800 text-center text-gray-500 hover:text-gray-800 rounded-lg dark:text-gray-400 dark:hover:text-gray-100"
                         type="button">
                         <svg class="w-5 h-5" aria-hidden="true" fill="currentColor" viewbox="0 0 20 20"
@@ -26,7 +26,7 @@
                                 d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
                         </svg>
                     </button>
-                    <div v-show="isDropdownOpen(card.id)"
+                    <div v-show="isDropdownOpen(card.id)" :id="`actions-${card.id}`"
                         class="absolute z-10 mb-[175px] bg-white divide-y divide-gray-100 rounded shadow w-44 dark:bg-gray-700 dark:divide-gray-600">
                         <ul class="py-1 text-sm" :aria-labelledby="`dropdown-button-${card.id}`">
                             <li>

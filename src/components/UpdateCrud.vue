@@ -28,7 +28,9 @@
                                 class="bg-gray-50 mt-4 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                                 placeholder="Entrez la question" style="min-height: 150px;">
                             </textarea>
-
+                            <p v-if="validationErrors.question" class="mt-2 text-sm text-red-600 dark:text-red-500">
+                                <span class="font-medium">Oops!</span> {{ validationErrors.question[0] }}
+                            </p>
                         </div>
                         <div class="mb-8 text-start">
                             <label for="answer"
@@ -37,6 +39,9 @@
                                 class="bg-gray-50 mt-4 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                                 placeholder="Entrez la réponse" style="min-height: 150px;">
                             </textarea>
+                            <p v-if="validationErrors.reponse" class="mt-2 text-sm text-red-600 dark:text-red-500">
+                                <span class="font-medium">Oops!</span> {{ validationErrors.reponse[0] }}
+                            </p>
                         </div>
                     </div>
                     <div class="flex items-center justify-center p-4 space-x-4">
@@ -50,7 +55,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch, type PropType } from 'vue';
+import { defineComponent, ref, watch, toRefs, type PropType } from 'vue';
+import { useCardStore } from '@/stores/cardStore';
 import type { Carte } from '@/models/Carte';
 
 export default defineComponent({
@@ -66,33 +72,56 @@ export default defineComponent({
     },
     setup(props, { emit }) {
         const form = ref({ question: '', answer: '' });
+        const cardStore = useCardStore();
+        // Utilisation de toRefs pour rendre les erreurs réactives
+        const { validationErrors } = toRefs(cardStore);
 
-        watch(() => props.card, (newVal) => {
-            if (newVal) {
-                form.value.question = newVal.question;
-                form.value.answer = newVal.reponse;
+        const resetForm = () => {
+            if (props.card) {
+                form.value.question = props.card.question;
+                form.value.answer = props.card.reponse;
             } else {
                 form.value.question = '';
                 form.value.answer = '';
             }
+        };
+
+        watch(() => props.card, () => {
+            resetForm();
         }, { immediate: true });
 
         const closeModal = () => {
+            cardStore.validationErrors = {};
+            resetForm();
             emit('close');
         };
 
-        const submitForm = () => {
+        const closeDropdowMenuActions = () => {
             if (props.card) {
-                console.log('Form Data:', form.value);
-                emit('save', { id: props.card.id, question: form.value.question, answer: form.value.answer });
-                closeModal();
+                const action = document.getElementById(`button-action-${props.card.id}`);
+                if (action) {
+                    action.click();
+                }
+            }
+        };
+
+        const submitForm = async () => {
+            if (props.card) {
+                await cardStore.updateCard(props.card.id, form.value.question, form.value.answer);
+                if (!validationErrors.value || Object.keys(validationErrors.value).length === 0) {
+                    closeModal();
+                    closeDropdowMenuActions();
+                } else {
+                    resetForm();
+                }
             }
         };
 
         return {
             form,
             closeModal,
-            submitForm
+            submitForm,
+            validationErrors
         };
     }
 });
