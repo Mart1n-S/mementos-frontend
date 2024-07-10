@@ -47,6 +47,36 @@ export const useCardStore = defineStore('card', () => {
     }
 
     /**
+     * Crée une carte pour l'utilisateur
+     * @param themeId
+     * @param question 
+     * @param reponse 
+     */
+    async function createCard(themeId: number, question: string, reponse: string) {
+        try {
+            const token = localStorage.getItem('access_token');
+            const response = await axios.post('/cartes', {
+                question,
+                reponse,
+                theme_id: themeId
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            cards.value.push(response.data);
+            validationErrors.value = {};
+        } catch (error: any) {
+            if (error.response && error.response.status === 422) {
+                validationErrors.value = error.response.data.errors;
+            } else {
+                errorMessage.value = 'Erreur lors de la création de la carte';
+            }
+            console.error('Erreur lors de la création de la carte:', error);
+        }
+    }
+
+    /**
      * Met à jour une carte de l'utilisateur 
      * @param cardId 
      * @param question
@@ -98,6 +128,6 @@ export const useCardStore = defineStore('card', () => {
         }
     }
 
-    return { cards, errorMessage, validationErrors, fetchCardsByTheme, fetchCardsOfUser, updateCard, deleteCard };
+    return { cards, errorMessage, validationErrors, fetchCardsByTheme, fetchCardsOfUser, createCard, updateCard, deleteCard };
 });
 

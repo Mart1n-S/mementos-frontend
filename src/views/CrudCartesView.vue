@@ -11,6 +11,7 @@ const themeId = Array.isArray(route.params.themeId) ? route.params.themeId[0] : 
 
 const themeStore = useThemeStore();
 const themeName = ref('');
+const themeSate = ref('');
 
 onMounted(async () => {
     const theme = themeStore.themes.find(t => t.id === parseInt(themeId));
@@ -21,6 +22,7 @@ onMounted(async () => {
         await themeStore.fetchThemeById(themeId);
         if (themeStore.theme) {
             themeName.value = themeStore.theme.nom;
+            themeSate.value = themeStore.theme.public == true ? 'Public' : 'Privé';
         }
     }
 });
@@ -33,6 +35,7 @@ onMounted(async () => {
                 <div class="flex flex-col items-center justify-center p-4 py-10 text-center text-white">
                     <BackButton />
                     <h1 class="mb-4 text-[50px] font-bold">{{ themeName }}</h1>
+                    <p class="mb-8 font-semibold text-[22px]">Etat : {{ themeSate }}</p>
                     <div v-if="themeName != ''" class="flex flex-col w-full my-8 space-y-4 md:w-4/12">
                         <button
                             class="btn btn-primary px-4 py-2 rounded-[3px] text-[20px] text-white font-semibold h-[49px] bg-[#2698E2] md:hover:bg-[#46a9ef]">
