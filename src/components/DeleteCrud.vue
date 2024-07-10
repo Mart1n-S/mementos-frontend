@@ -39,6 +39,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useCardStore } from '@/stores/cardStore';
+import { useThemeStore } from '@/stores/themeStore';
 import type { PropType } from 'vue';
 
 export default defineComponent({
@@ -50,10 +51,15 @@ export default defineComponent({
         cardId: {
             type: Number as PropType<number | null>,
             default: null
+        },
+        themeId: {
+            type: Number as PropType<number | null>,
+            default: null
         }
     },
     setup(props, { emit }) {
         const cardStore = useCardStore();
+        const themeStore = useThemeStore();
 
         const closeModal = () => {
             emit('close');
@@ -64,6 +70,9 @@ export default defineComponent({
                 await cardStore.deleteCard(props.cardId);
                 emit('confirm-delete', props.cardId);
                 closeModal();
+            } else if (props.themeId !== null) {
+                await themeStore.deleteTheme(props.themeId);
+                emit('confirm-delete', props.themeId);
             }
         };
 

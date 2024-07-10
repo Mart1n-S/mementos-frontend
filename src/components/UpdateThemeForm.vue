@@ -46,11 +46,13 @@
                 class="w-full mb-8 px-4 py-2 font-bold text-white text-[22px] bg-[#2698E2] md:hover:bg-[#46a9ef] rounded focus:outline-none focus:shadow-outline">
                 Sauvegarder
             </button>
-            <button type="button"
+            <button type="button" @click="showDeleteModal"
                 class="w-full px-4 py-2 font-bold text-white text-[22px] bg-[#FF4F79] md:hover:bg-[#ff3c87] rounded focus:outline-none focus:shadow-outline">
                 Supprimer
             </button>
         </form>
+        <DeleteCrud :isVisible="isDeleteModalVisible" :themeId="parseInt(themeId)" @close="hideDeleteModal"
+            @confirm-delete="handleThemeDeleted" />
     </div>
 </template>
 
@@ -59,9 +61,13 @@ import { defineComponent, ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useCategorieStore } from '@/stores/categorieStore';
 import { useThemeStore } from '@/stores/themeStore';
+import DeleteCrud from '@/components/DeleteCrud.vue';
 import type { Categorie } from '@/models/Categorie';
 
 export default defineComponent({
+    components: {
+        DeleteCrud,
+    },
     setup() {
         const route = useRoute();
         const router = useRouter();
@@ -74,6 +80,7 @@ export default defineComponent({
         const selectedState = ref('true');
         const validationErrors = ref<{ [key: string]: string[] }>({});
         const categories = ref<Categorie[]>([]);
+        const isDeleteModalVisible = ref(false);
 
         onMounted(async () => {
             await categorieStore.fetchCategories();
@@ -100,6 +107,18 @@ export default defineComponent({
             }
         };
 
+        const showDeleteModal = () => {
+            isDeleteModalVisible.value = true;
+        };
+
+        const hideDeleteModal = () => {
+            isDeleteModalVisible.value = false;
+        };
+
+        const handleThemeDeleted = () => {
+            router.push('/mes-themes');
+        };
+
         return {
             themeName,
             selectedCategory,
@@ -107,6 +126,11 @@ export default defineComponent({
             categories,
             validationErrors,
             updateTheme,
+            showDeleteModal,
+            hideDeleteModal,
+            isDeleteModalVisible,
+            handleThemeDeleted,
+            themeId,
         };
     },
 });

@@ -61,6 +61,11 @@ export const useThemeStore = defineStore('theme', () => {
         }
     }
 
+    /**
+     * Met à jour un thème
+     * @param themeId 
+     * @param updatedData 
+     */
     async function updateTheme(themeId: string, updatedData: { nom: string; category_id: number | null; public: boolean }) {
         try {
             validationErrors.value = null;
@@ -89,6 +94,27 @@ export const useThemeStore = defineStore('theme', () => {
         }
     }
 
+    /**
+     * Supprime un thème
+     * @param themeId 
+     */
+    async function deleteTheme(themeId: number) {
+        try {
+            const token = localStorage.getItem('access_token');
+            await axios.delete(`/themes/${themeId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            themes.value = themes.value.filter(theme => theme.id !== themeId);
+            if (theme.value && theme.value.id === themeId) {
+                theme.value = null;
+            }
+        } catch (error: any) {
+            errorMessage.value = 'Erreur lors de la suppression du thème';
+            console.error('Erreur lors de la suppression du thème:', error);
+        }
+    }
 
-    return { themes, theme, errorMessage, validationErrors, fetchThemesByCategory, fetchUserThemes, fetchThemeById, updateTheme };
+    return { themes, theme, errorMessage, validationErrors, fetchThemesByCategory, fetchUserThemes, fetchThemeById, updateTheme, deleteTheme };
 });
