@@ -7,6 +7,7 @@ export const useThemeStore = defineStore('theme', () => {
     const themes = ref<Theme[]>([]);
     const theme = ref<Theme | null>(null);
     const errorMessage = ref<string | null>(null);
+    const validationErrors = ref<{ [key: string]: string[] } | null>(null);
 
     /**
      * Récupère les thèmes publiques par catégorie
@@ -60,5 +61,34 @@ export const useThemeStore = defineStore('theme', () => {
         }
     }
 
-    return { themes, theme, errorMessage, fetchThemesByCategory, fetchUserThemes, fetchThemeById };
+    async function updateTheme(themeId: string, updatedData: { nom: string; category_id: number | null; public: boolean }) {
+        try {
+            validationErrors.value = null;
+            const token = localStorage.getItem('access_token');
+            const response = await axios.put(`/themes/${themeId}`, updatedData, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            // Mettre à jour le thème dans la liste des thèmes
+            const index = themes.value.findIndex(theme => theme.id === parseInt(themeId));
+            if (index !== -1) {
+                themes.value[index] = response.data;
+            }
+            // Mettre à jour le thème actuel si c'est le même thème
+            if (theme.value && theme.value.id === parseInt(themeId)) {
+                theme.value = response.data;
+            }
+        } catch (error: any) {
+            if (error.response && error.response.status === 422) {
+                validationErrors.value = error.response.data.errors;
+            } else {
+                errorMessage.value = 'Erreur lors de la mise à jour du thème';
+                console.error('Erreur lors de la mise à jour du thème:', error);
+            }
+        }
+    }
+
+
+    return { themes, theme, errorMessage, validationErrors, fetchThemesByCategory, fetchUserThemes, fetchThemeById, updateTheme };
 });

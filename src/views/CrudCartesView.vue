@@ -17,6 +17,7 @@ onMounted(async () => {
     const theme = themeStore.themes.find(t => t.id === parseInt(themeId));
     if (theme) {
         themeName.value = theme.nom;
+        themeSate.value = theme.public == true ? 'Public' : 'Privé';
     } else {
         // Si le user tape lui-même l'URL, on doit récupérer le thème car pas récupéré par le store précédemment
         await themeStore.fetchThemeById(themeId);
@@ -41,10 +42,10 @@ onMounted(async () => {
                             class="btn btn-primary px-4 py-2 rounded-[3px] text-[20px] text-white font-semibold h-[49px] bg-[#2698E2] md:hover:bg-[#46a9ef]">
                             Réviser
                         </button>
-                        <button
+                        <RouterLink :to="`/mes-themes/gestion/update/${themeId}`"
                             class="btn btn-secondary px-4 py-2 rounded-[3px] text-[20px] text-white font-semibold h-[49px] bg-[#FF4F79] md:hover:bg-[#ff3c87]">
                             Modifier
-                        </button>
+                        </RouterLink>
                     </div>
 
                 </div>

@@ -48,6 +48,13 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/mes-themes/gestion/update/:themeId',
+      name: 'theme-update',
+      component: () => import('@/views/UpdateThemeView.vue'),
+      props: true,
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/profil/update',
       name: 'modifier-profil',
       component: () => import('@/views/UpdateUserView.vue'),
