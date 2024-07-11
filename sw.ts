@@ -1,5 +1,5 @@
 const CACHE_NAME = `mementos-ressources-api-v${new Date().getTime()}`
-const CACHE_EXPIRATION = 1 * 60 * 1000 // 1 hour in milliseconds
+
 const urlsToCache = [
   '/',
   '/index.html',
@@ -31,9 +31,7 @@ const urlsToCache = [
 self.addEventListener('install', (event: ExtendableEvent) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        return cache.addAll(urlsToCache);
-      })
+      .then(cache => cache.addAll(urlsToCache))
       .then(() => self.skipWaiting())
   );
 });
@@ -54,7 +52,7 @@ self.addEventListener('activate', (event: ExtendableEvent) => {
   );
 });
 
-// Intercepter les requêtes réseau et servir les ressources depuis le cache
+// Intercepter les requêtes réseau et servir les ressources depuis le cache avec fallback réseau
 self.addEventListener('fetch', (event: FetchEvent) => {
   if (event.request.method !== 'GET') {
     return;
@@ -62,26 +60,30 @@ self.addEventListener('fetch', (event: FetchEvent) => {
 
   if (event.request.url.startsWith('http')) {
     event.respondWith(
-      caches.match(event.request).then(response => {
-        const fetchRequest = fetch(event.request).then(networkResponse => {
+      fetch(event.request)
+        .then(networkResponse => {
+          // Mettre à jour le cache avec la nouvelle réponse
           const clonedResponse = networkResponse.clone();
           caches.open(CACHE_NAME).then(cache => {
             const headers = new Headers(clonedResponse.headers);
             headers.append('sw-cache-timestamp', Date.now().toString());
-            cache.put(event.request, new Response(clonedResponse.body, { headers }));
+            const newResponse = new Response(clonedResponse.body, { headers });
+
+            cache.put(event.request, newResponse);
           });
           return networkResponse;
-        });
-
-        if (response) {
-          const responseTimestamp = response.headers.get('sw-cache-timestamp');
-          if (responseTimestamp && Date.now() - parseInt(responseTimestamp) < CACHE_EXPIRATION) {
-            return response;
-          }
-        }
-
-        return fetchRequest;
-      })
+        })
+        .catch(() => {
+          // Si la requête réseau échoue, retourner la réponse du cache
+          return caches.match(event.request).then(cachedResponse => {
+            if (cachedResponse) {
+              return cachedResponse;
+            } else {
+              // En cas de problème, retourner une réponse par défaut (ex: page d'erreur)
+              return caches.match('/index.html') as Promise<Response>;
+            }
+          });
+        })
     );
   }
 });
