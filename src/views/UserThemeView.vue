@@ -63,12 +63,7 @@ const notificationStore = useNotificationStore();
 const searchQuery = ref('');
 const isLoading = ref(true);
 const router = useRouter();
-const successMessage = ref(notificationStore.successMessage);
-if (successMessage.value !== '') {
-    setTimeout(() => {
-        successMessage.value = '';
-    }, 5000);
-}
+const successMessage = computed(() => notificationStore.successMessage);
 const filteredThemes = computed(() => {
     return themeStore.themes.filter(theme =>
         theme.nom.toLowerCase().includes(searchQuery.value.toLowerCase())
