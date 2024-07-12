@@ -35,6 +35,12 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/creer-themes',
+      name: 'creer-themes',
+      component: () => import('@/views/CreateThemeView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/mes-themes',
       name: 'mes-themes',
       component: () => import('@/views/UserThemeView.vue'),

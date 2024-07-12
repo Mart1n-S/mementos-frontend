@@ -62,6 +62,30 @@ export const useThemeStore = defineStore('theme', () => {
     }
 
     /**
+     * Crée un nouveau thème
+     * @param newTheme 
+     */
+    async function createTheme(newTheme: { nom: string; category_id: number | null; public: boolean; cards: { question: string; reponse: string; }[] }) {
+        try {
+            validationErrors.value = null;
+            const token = localStorage.getItem('access_token');
+            const response = await axios.post('/themes', newTheme, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            themes.value.push(response.data);
+        } catch (error: any) {
+            if (error.response && error.response.status === 422) {
+                validationErrors.value = error.response.data.errors;
+            } else {
+                errorMessage.value = 'Erreur lors de la création du thème';
+                console.error('Erreur lors de la création du thème:', error);
+            }
+        }
+    }
+
+    /**
      * Met à jour un thème
      * @param themeId 
      * @param updatedData 
@@ -116,5 +140,5 @@ export const useThemeStore = defineStore('theme', () => {
         }
     }
 
-    return { themes, theme, errorMessage, validationErrors, fetchThemesByCategory, fetchUserThemes, fetchThemeById, updateTheme, deleteTheme };
+    return { themes, theme, errorMessage, validationErrors, fetchThemesByCategory, fetchUserThemes, fetchThemeById, createTheme, updateTheme, deleteTheme };
 });
