@@ -1,0 +1,44 @@
+{
+  "name": "Mementos",
+  "short_name": "Memen",
+  "description": "Une application installable et utilisable pour gérer vos révisons espaçées dans le temps.",
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/",
+  "id": "/",
+  "icons": [
+    {
+      "src": "mementos-icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "mementos-icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "mementos-icon-1200x1200.png",
+      "sizes": "1200x1200",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "mementos-preview-1-863x469.png",
+      "sizes": "863x469",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Mementos app screenshot"
+    },
+    {
+      "src": "mementos-preview-2-863x469.png",
+      "sizes": "863x469",
+      "type": "image/png",
+      "label": "Mementos app screenshot"
+    }
+  ]
+}
