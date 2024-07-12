@@ -11,7 +11,7 @@
                             class="btn btn-primary px-4 py-2 rounded-[3px] text-[20px] text-white font-semibold h-[49px] bg-[#2698E2] md:hover:bg-[#46a9ef]">
                             Réviser
                         </button>
-                        <button
+                        <button v-if="!isAuthor"
                             class="btn btn-secondary px-4 py-2 rounded-[3px] text-[20px] text-white font-semibold h-[49px] bg-[#FF4F79] md:hover:bg-[#ff3c87]">
                             Dupliquer
                         </button>
@@ -53,6 +53,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useCardStore } from '@/stores/cardStore';
+import { useAuthStore } from '@/stores/authStore';
 import CardList from '@/components/CardList.vue';
 import BackButton from '@/components/BackButton.vue';
 import FooterComponent from '@/components/FooterComponent.vue';
@@ -61,10 +62,14 @@ import FooterComponent from '@/components/FooterComponent.vue';
 const props = defineProps<{ themeId: number }>();
 
 const cardStore = useCardStore();
+const authStore = useAuthStore();
 const isLoading = ref(true);
 
 const cards = computed(() => cardStore.cards);
 const theme = computed(() => cards.value.length > 0 ? cards.value[0].theme : null);
+const isAuthor = computed(() => {
+    return theme.value && authStore.user ? theme.value.user.id === authStore.user.id : false;
+});
 
 onMounted(async () => {
     await cardStore.fetchCardsByTheme(props.themeId);

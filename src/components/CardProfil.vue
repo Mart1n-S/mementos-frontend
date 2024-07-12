@@ -20,6 +20,10 @@
                     class="btn btn-secondary px-4 py-2 rounded-[3px] text-[20px] text-white font-semibold h-[49px] bg-[#FF4F79] md:hover:bg-[#ff3c87]">
                     Réviser
                 </RouterLink>
+                <RouterLink to="/creer-themes"
+                    class="btn btn-secondary px-4 py-2 rounded-[3px] text-[20px] text-white font-semibold h-[49px] bg-[#FFA34F] md:hover:bg-[#f8b270]">
+                    Créer un mementos
+                </RouterLink>
             </div>
 
         </div>

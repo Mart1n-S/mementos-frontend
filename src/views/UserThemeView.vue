@@ -11,6 +11,9 @@
 
                 <div class="min-h-screen py-10 bg-white rounded-t-3xl">
                     <div class="container px-4 mx-auto text-center sm:px-6">
+                        <p v-if="successMessage" class="mt-2 mb-4 text-lg text-center text-green-600">
+                            <span class="font-medium">Succès!</span> {{ successMessage }}
+                        </p>
                         <div v-if="isLoading" role="status" class="text-center">
                             <svg aria-hidden="true"
                                 class="inline w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-green-500"
@@ -45,6 +48,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useThemeStore } from '@/stores/themeStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useNotificationStore } from '@/stores/notificationStore';
 import BackButton from '@/components/BackButton.vue';
 import SearchBar from '@/components/SearchBar.vue';
 import ThemeItem from '@/components/ThemeItem.vue';
@@ -54,11 +58,17 @@ import type { Theme } from '@/models/Theme';
 
 const themeStore = useThemeStore();
 const authStore = useAuthStore();
+const notificationStore = useNotificationStore();
 
 const searchQuery = ref('');
 const isLoading = ref(true);
 const router = useRouter();
-
+const successMessage = ref(notificationStore.successMessage);
+if (successMessage.value !== '') {
+    setTimeout(() => {
+        successMessage.value = '';
+    }, 5000);
+}
 const filteredThemes = computed(() => {
     return themeStore.themes.filter(theme =>
         theme.nom.toLowerCase().includes(searchQuery.value.toLowerCase())

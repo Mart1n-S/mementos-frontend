@@ -158,6 +158,19 @@ export default defineComponent({
                         <span class="ms-3 text-[20px]">Mes thèmes</span>
                     </RouterLink>
                 </li>
+                <li v-if="authStore.isAuthenticated">
+                    <RouterLink to="/creer-themes"
+                        class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                        <svg class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                            width="20" height="20" fill="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Zm7 8H7v2h4v4h2v-4h4v-2h-4V7h-2v4Z">
+                            </path>
+                        </svg>
+                        <span class="ms-3 text-[20px]">Creer un thème</span>
+                    </RouterLink>
+                </li>
             </ul>
         </div>
     </aside>
