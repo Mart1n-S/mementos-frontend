@@ -140,5 +140,26 @@ export const useThemeStore = defineStore('theme', () => {
         }
     }
 
-    return { themes, theme, errorMessage, validationErrors, fetchThemesByCategory, fetchUserThemes, fetchThemeById, createTheme, updateTheme, deleteTheme };
+    /**
+     * Duplique un thème et ses cartes associées
+     * @param themeId 
+     */
+    async function duplicateTheme(themeId: number) {
+        try {
+            const token = localStorage.getItem('access_token');
+            const response = await axios.post(`/duplicate/${themeId}/themes`, {}, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            themes.value.push(response.data);
+            return response.data;
+        } catch (error: any) {
+            errorMessage.value = 'Erreur lors de la duplication du thème';
+            console.error('Erreur lors de la duplication du thème:', error);
+            throw error;
+        }
+    }
+
+    return { themes, theme, errorMessage, validationErrors, fetchThemesByCategory, fetchUserThemes, fetchThemeById, createTheme, updateTheme, deleteTheme, duplicateTheme };
 });
