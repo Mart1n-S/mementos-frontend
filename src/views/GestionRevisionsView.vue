@@ -39,13 +39,15 @@ import FooterComponent from '@/components/FooterComponent.vue';
 import BackButton from '@/components/BackButton.vue';
 import { useRouter } from 'vue-router';
 import RevisionGestion from '@/components/RevisionGestion.vue';
-import { useThemeStore } from '@/stores/themeStore';
+import { useAuthStore } from '@/stores/authStore';
+import { useRevisionStore } from '@/stores/revisionStore';
 import type { Theme } from '@/models/Theme';
 import DeleteCrud from '@/components/DeleteCrud.vue';
 
 const props = defineProps<{ themeId: string }>();
 const isLoading = ref(true);
-const themeStore = useThemeStore();
+const revisionStore = useRevisionStore();
+const authStore = useAuthStore();
 const theme = ref<Theme | null>(null);
 const isDeleteModalVisible = ref(false);
 const router = useRouter();
@@ -63,8 +65,13 @@ const handleThemeDeleted = () => {
 };
 
 onMounted(async () => {
-    await themeStore.fetchThemeById(props.themeId);
-    theme.value = themeStore.theme;
+    if (authStore.user) {
+        await revisionStore.fetchUserRevision(authStore.user.id);
+    }
+    const fetchedThemes = revisionStore.themesRevision.filter(
+        revisionTheme => revisionTheme.id.toString() === props.themeId
+    );
+    theme.value = fetchedThemes.length > 0 ? fetchedThemes[0] : null;
     isLoading.value = false;
 });
 </script>
