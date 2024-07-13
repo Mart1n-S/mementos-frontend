@@ -29,9 +29,16 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
-      path: '/mes-cartes',
-      name: 'mes-cartes',
-      component: () => import('@/views/CrudCartesView.vue'),
+      path: '/mon-mementos',
+      name: 'mon-mementos',
+      component: () => import('@/views/RevisionsView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/mon-mementos/gestion/:themeId',
+      name: 'RevisionsManagement',
+      component: () => import('@/views/GestionRevisionsView.vue'),
+      props: true,
       meta: { requiresAuth: true }
     },
     {

@@ -138,6 +138,24 @@ export default defineComponent({
                     </RouterLink>
                 </li>
                 <li v-if="authStore.isAuthenticated">
+                    <RouterLink to="/mon-mementos"
+                        class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                        <svg class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
+                            width="20" height="20" fill="none" stroke="currentColor" stroke-linecap="round"
+                            stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M9.518 22c-.49-1.598-1.23-2.789-2.217-3.573-1.483-1.177-3.839-.446-4.709-1.66-.87-1.213.61-3.445 1.13-4.763.518-1.317-1.991-1.782-1.698-2.156.195-.25 1.463-.969 3.804-2.158C6.493 3.897 8.95 2 13.2 2c6.372 0 8.8 5.403 8.8 8.84 0 3.436-2.94 7.138-7.128 7.936-.374.546.166 1.62 1.62 3.224">
+                            </path>
+                            <path
+                                d="M9.75 7.25c-.327 1.268-.23 2.157.291 2.67.521.512 1.41.847 2.665 1.005-.285 1.634.062 2.401 1.041 2.3.98-.1 1.567-.508 1.765-1.22 1.53.43 2.36.07 2.488-1.08.193-1.725-.738-3.1-1.119-3.1s-1.37-.047-1.37-.575c0-.527-1.153-.825-2.195-.825-1.041 0-.414-.702-1.844-.425-.954.185-1.528.602-1.722 1.25Z"
+                                clip-rule="evenodd"></path>
+                            <path d="M15.25 12.75c-.508.316-1.206.84-1.5 1.25-.734 1.025-1.33 1.649-1.46 2.304"></path>
+                        </svg>
+                        <span class="ms-3 text-[20px]">Mon mementos</span>
+                    </RouterLink>
+                </li>
+                <li v-if="authStore.isAuthenticated">
                     <RouterLink to="/mes-themes"
                         class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <svg class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"

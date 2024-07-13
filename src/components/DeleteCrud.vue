@@ -40,6 +40,7 @@
 import { defineComponent } from 'vue';
 import { useCardStore } from '@/stores/cardStore';
 import { useThemeStore } from '@/stores/themeStore';
+import { useRevisionStore } from '@/stores/revisionStore';
 import type { PropType } from 'vue';
 
 export default defineComponent({
@@ -55,11 +56,20 @@ export default defineComponent({
         themeId: {
             type: Number as PropType<number | null>,
             default: null
+        },
+        revisionThemeId: {
+            type: Number as PropType<number | null>,
+            default: null
+        },
+        deleteAllRevisions: {
+            type: Boolean,
+            default: false
         }
     },
     setup(props, { emit }) {
         const cardStore = useCardStore();
         const themeStore = useThemeStore();
+        const revisionStore = useRevisionStore();
 
         const closeModal = () => {
             emit('close');
@@ -70,9 +80,19 @@ export default defineComponent({
                 await cardStore.deleteCard(props.cardId);
                 emit('confirm-delete', props.cardId);
                 closeModal();
+                console.log('Card deleted');
             } else if (props.themeId !== null) {
                 await themeStore.deleteTheme(props.themeId);
                 emit('confirm-delete', props.themeId);
+                console.log('Theme deleted');
+            } else if (props.revisionThemeId !== null) {
+                await revisionStore.deleteThemeFromRevision(props.revisionThemeId);
+                emit('confirm-delete', props.revisionThemeId);
+                console.log('Theme deleted from revision');
+            } else if (props.deleteAllRevisions) {
+                await revisionStore.deleteAllRevisions();
+                emit('confirm-delete');
+                closeModal();
             }
         };
 
