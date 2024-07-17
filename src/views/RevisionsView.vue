@@ -9,14 +9,21 @@
                         des thèmes ou tout supprimer.</p>
                     <SearchBar v-if="filteredThemes.length > 0" :modelValue="searchQuery"
                         @update:modelValue="searchQuery = $event" />
-                    <button v-if="filteredThemes.length > 0" class="w-full px-4 mt-8 py-2 font-bold text-white text-[22px] bg-[#2698E2] md:hover:bg-[#46a9ef]
-                        rounded focus:outline-none focus:shadow-outline">
-                        Prochaine révision est dans 1 jour
-                    </button>
-                    <button v-if="filteredThemes.length > 0" type="button" @click="showDeleteModal"
-                        class="w-full px-4 mt-8 py-2 font-bold text-white text-[22px] bg-[#FF4F79] md:hover:bg-[#ff3c87] rounded focus:outline-none focus:shadow-outline">
-                        Supprimer mon mementos
-                    </button>
+                    <div class="flex flex-col w-full space-y-4 md:w-4/12">
+                        <button v-if="nextRevisionInDays !== null && nextRevisionInDays > 0"
+                            class="w-full px-4 mt-8 py-2 font-bold text-white text-[22px] bg-[#2698E2] md:hover:bg-[#46a9ef] rounded focus:outline-none focus:shadow-outline">
+                            Prochaine révision est dans {{ nextRevisionInDays }} jour{{ nextRevisionInDays === 1 ? '' :
+                                's' }}
+                        </button>
+                        <button v-else-if="filteredThemes.length > 0"
+                            class="w-full px-4 mt-8 py-2 font-bold text-white text-[22px] bg-[#2698E2] md:hover:bg-[#46a9ef] rounded focus:outline-none focus:shadow-outline">
+                            Réviser mon Mementos
+                        </button>
+                        <button v-if="filteredThemes.length > 0" type="button" @click="showDeleteModal"
+                            class="w-full px-4 mt-8 py-2 font-bold text-white text-[22px] bg-[#FF4F79] md:hover:bg-[#ff3c87] rounded focus:outline-none focus:shadow-outline">
+                            Supprimer mon mementos
+                        </button>
+                    </div>
                 </div>
 
                 <div class="min-h-screen py-10 bg-white rounded-t-3xl">
@@ -41,6 +48,7 @@
                             <span class="sr-only">Loading...</span>
                         </div>
                         <div v-else>
+                            <h2 class="mb-8 text-[22px] font-bold">Liste de tous vos thèmes</h2>
                             <div v-if="filteredThemes.length > 0" class="grid grid-cols-1 gap-8 md:grid-cols-2">
                                 <ThemeItem v-for="theme in filteredThemes" :key="theme.id" :theme="theme"
                                     @click="handleThemeClick(theme)" />
@@ -87,6 +95,8 @@ const filteredThemes = computed(() => {
         theme.nom.toLowerCase().includes(searchQuery.value.toLowerCase())
     );
 });
+
+const nextRevisionInDays = computed(() => revisionStore.nextRevisionInDays);
 
 function handleThemeClick(theme: Theme) {
     router.push(`/mon-mementos/gestion/${theme.id}`);

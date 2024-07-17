@@ -7,6 +7,7 @@ import type { Theme } from '@/models/Theme';
 export const useRevisionStore = defineStore('revision', () => {
     const themesRevision = ref<Theme[]>([]);
     const notificationStore = useNotificationStore();
+    const nextRevisionInDays = ref<number | null>(null);
 
     /**
      * Récupère les révisions de l'utilisateur
@@ -15,12 +16,13 @@ export const useRevisionStore = defineStore('revision', () => {
     async function fetchUserRevision(userId: number) {
         try {
             const token = localStorage.getItem('access_token');
-            const response = await axios.get<Theme[]>(`/revision/${userId}`, {
+            const response = await axios.get(`/revision/${userId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
-            themesRevision.value = response.data;
+            themesRevision.value = response.data.themes;
+            nextRevisionInDays.value = response.data.nextRevisionInDays;
         } catch (error: any) {
             notificationStore.setErrorMessage('Erreur lors de la récupération des révisions de l\'utilisateur');
             console.error('Erreur lors de la récupération des révisions de l\'utilisateur:', error);
@@ -66,5 +68,5 @@ export const useRevisionStore = defineStore('revision', () => {
         }
     }
 
-    return { themesRevision, fetchUserRevision, deleteThemeFromRevision, deleteAllRevisions };
+    return { themesRevision, fetchUserRevision, nextRevisionInDays, deleteThemeFromRevision, deleteAllRevisions };
 });
