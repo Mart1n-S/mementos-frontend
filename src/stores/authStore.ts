@@ -223,6 +223,28 @@ export const useAuthStore = defineStore('auth', () => {
         successMessage.value = null;
     }
 
-    return { isAuthenticated, user, errorMessage, validationErrors, successMessage, login, register, forgotPassword, resetPassword, logout, checkAuth, clearError, clearSuccess, fetchUser, loadUserFromLocalStorage };
+    /**
+     * Met à jour le statut d'abonnement
+     * @param isSubscribed 
+     */
+    async function updateSubscriptionStatus(isSubscribed: boolean) {
+        try {
+            const token = localStorage.getItem('access_token');
+            await axios.post('/user/subscription', { isSubscribed }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            if (user.value) {
+                user.value.subscribedNotifications = isSubscribed;
+                console.log('User updated:', user.value);
+                localStorage.setItem('user', JSON.stringify(user.value));
+            }
+        } catch (error) {
+            console.error('Failed to update subscription:', error);
+        }
+    }
+
+    return { isAuthenticated, user, errorMessage, validationErrors, successMessage, login, register, forgotPassword, resetPassword, logout, checkAuth, clearError, clearSuccess, fetchUser, loadUserFromLocalStorage, updateSubscriptionStatus };
 });
 
