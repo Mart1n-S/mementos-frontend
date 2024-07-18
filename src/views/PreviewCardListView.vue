@@ -6,8 +6,8 @@
                     <BackButton />
                     <h1 class="mb-4 text-[50px] font-bold" v-if="theme">{{ theme.nom }}</h1>
                     <p class="mb-8 text-[24px] underline" v-if="theme">Auteur : {{ theme.user.pseudo }}</p>
-                    <div class="flex flex-col w-full space-y-4 md:w-4/12">
-                        <button
+                    <div v-if="authStore.user" class="flex flex-col w-full space-y-4 md:w-4/12">
+                        <button v-if="!isAlreadyRevised && theme !== null" @click="handleRevise(theme.id)"
                             class="btn btn-primary px-4 py-2 rounded-[3px] text-[20px] text-white font-semibold h-[49px] bg-[#2698E2] md:hover:bg-[#46a9ef]">
                             Réviser
                         </button>
@@ -74,6 +74,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useCardStore } from '@/stores/cardStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useThemeStore } from '@/stores/themeStore';
+import { useRevisionStore } from '@/stores/revisionStore';
 import CardList from '@/components/CardList.vue';
 import BackButton from '@/components/BackButton.vue';
 import FooterComponent from '@/components/FooterComponent.vue';
@@ -85,6 +86,7 @@ const props = defineProps<{ themeId: number }>();
 const cardStore = useCardStore();
 const authStore = useAuthStore();
 const themeStore = useThemeStore();
+const revisionStore = useRevisionStore();
 const isLoading = ref(true);
 const isLoadingDuplicate = ref(false);
 const notificationStore = useNotificationStore();
@@ -111,9 +113,21 @@ const duplicateCurrentTheme = async () => {
     }
 };
 
+const handleRevise = async (id: number) => {
+    await revisionStore.addToMyRevision(id);
+};
+
+const isAlreadyRevised = computed(() => {
+    return revisionStore.themesRevision.some(theme => theme.id === props.themeId);
+});
+
 onMounted(async () => {
     await cardStore.fetchCardsByTheme(props.themeId);
     isLoading.value = false;
+
+    if (authStore.user) {
+        await revisionStore.fetchUserRevision(authStore.user.id);
+    }
 });
 </script>
 

@@ -68,5 +68,22 @@ export const useRevisionStore = defineStore('revision', () => {
         }
     }
 
-    return { themesRevision, fetchUserRevision, nextRevisionInDays, deleteThemeFromRevision, deleteAllRevisions };
+    async function addToMyRevision(themeId: number) {
+        try {
+            const token = localStorage.getItem('access_token');
+            const response = await axios.post(`/revision/${themeId}`, {}, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            notificationStore.setSuccessMessage('Thème ajouté à vos révisions.');
+            themesRevision.value.push(response.data[0]);
+        } catch (error: any) {
+            const errorMessage = error.response?.data?.error || 'Erreur lors de l\'ajout du thème à vos révisions';
+            notificationStore.setErrorMessage(`${errorMessage}`);
+            console.error('Erreur lors de l\'ajout du thème à vos révisions:', error);
+        }
+    }
+
+    return { themesRevision, fetchUserRevision, nextRevisionInDays, deleteThemeFromRevision, deleteAllRevisions, addToMyRevision };
 });
