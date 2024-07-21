@@ -14,7 +14,7 @@ export const useCardStore = defineStore('card', () => {
      */
     async function fetchCardsByTheme(themeId: number) {
         try {
-            const response = await axios.get<Carte[]>(`/themes/${themeId}/cards`);
+            const response = await axios.get<Carte[]>(`/cartes/${themeId}`);
             cards.value = response.data;
         } catch (error: any) {
             errorMessage.value = 'Erreur lors de la récupération des cartes';
@@ -29,7 +29,7 @@ export const useCardStore = defineStore('card', () => {
     async function fetchCardsOfUser(themeId: string) {
         try {
             const token = localStorage.getItem('access_token');
-            const response = await axios.get<Carte[]>(`/cartes/${themeId}`, {
+            const response = await axios.get<Carte[]>(`/cartes/${themeId}/user`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }

@@ -16,7 +16,7 @@
                     class="btn btn-primary px-4 py-2 rounded-[3px] text-[20px] text-white font-semibold h-[49px] bg-[#2698E2] md:hover:bg-[#46a9ef]">
                     Modifier
                 </RouterLink>
-                <RouterLink to="/profil/update"
+                <RouterLink to="/mon-mementos"
                     class="btn btn-secondary px-4 py-2 rounded-[3px] text-[20px] text-white font-semibold h-[49px] bg-[#FF4F79] md:hover:bg-[#ff3c87]">
                     Réviser
                 </RouterLink>

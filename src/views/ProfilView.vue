@@ -1,7 +1,41 @@
 <script setup lang="ts">
+import { onMounted } from 'vue';
 import CardProfil from '@/components/CardProfil.vue';
 import FooterComponent from '@/components/FooterComponent.vue';
 import BackButton from '@/components/BackButton.vue';
+import { askPermission, subscribeUserToPush, sendSubscriptionToBackEnd } from '@/services/pushService';
+import { useAuthStore } from '@/stores/authStore';
+
+const authStore = useAuthStore();
+
+const checkSubscriptionStatus = async () => {
+    const registration = await navigator.serviceWorker.getRegistration();
+    if (registration) {
+        const subscription = await registration.pushManager.getSubscription();
+        if (!subscription && authStore.user) {
+            await authStore.updateSubscriptionStatus(false);
+        }
+    }
+};
+
+onMounted(async () => {
+    if (authStore.isAuthenticated && authStore.user) {
+        await checkSubscriptionStatus();
+        if (!authStore.user.subscribedNotifications) {
+            try {
+                const permission = await askPermission();
+                if (permission === 'granted') {
+                    const subscription = await subscribeUserToPush();
+                    await sendSubscriptionToBackEnd(subscription);
+                    await authStore.updateSubscriptionStatus(true);
+                    console.log('Notifications push configurées avec succès.');
+                }
+            } catch (error) {
+                console.error('Erreur lors de la configuration des notifications push:', error);
+            }
+        }
+    }
+});
 </script>
 
 <template>

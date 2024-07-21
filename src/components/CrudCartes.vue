@@ -7,6 +7,12 @@
                     {{ cardStore.errorMessage }}
                 </div>
                 <div v-else class="relative overflow-hidden bg-white shadow-md dark:bg-gray-800 sm:rounded-lg">
+                    <p v-if="successMessage" class="mt-2 mb-4 text-lg text-center text-green-600">
+                        <span class="font-medium">Succès!</span> {{ successMessage }}
+                    </p>
+                    <p v-if="errorMessage" class="mt-2 mb-4 text-lg text-center text-red-600">
+                        <span class="font-medium">Erreur!</span> {{ errorMessage }}
+                    </p>
                     <div
                         class="flex flex-col items-center justify-between p-4 space-y-3 md:flex-row md:space-y-0 md:space-x-4">
                         <div class="w-full md:w-1/2">
@@ -42,7 +48,7 @@
             </div>
             <!-- End block -->
             <!-- Add modal -->
-            <CreateCrud :isVisible="isCreateModalVisible" @close="closeCreateModal" />
+            <CreateCrud :isVisible="isCreateModalVisible" :themeId="parseInt(themeId)" @close="closeCreateModal" />
             <!-- Update modal -->
             <UpdateCrud :isVisible="isUpdateModalVisible" :card="selectedCard" @close="closeUpdateModal" />
             <!-- Read modal -->
@@ -57,6 +63,7 @@
 <script lang="ts">
 import { defineComponent, ref, computed, watch } from 'vue';
 import { useCardStore } from '@/stores/cardStore';
+import { useNotificationStore } from '@/stores/notificationStore';
 import CreateCrud from '@/components/CreateCrud.vue';
 import ListCrud from '@/components/ListCrud.vue';
 import ShowCrud from '@/components/ShowCrud.vue';
@@ -82,6 +89,7 @@ export default defineComponent({
     },
     setup(props) {
         const cardStore = useCardStore();
+        const notificationStore = useNotificationStore();
         const selectedCard = ref<Carte | null>(null);
         const isShowModalVisible = ref(false);
         const isDeleteModalVisible = ref(false);
@@ -90,6 +98,8 @@ export default defineComponent({
         const selectedCardId = ref<number | null>(null);
         const searchQuery = ref('');
         const isLoading = ref(true);
+        const successMessage = computed(() => notificationStore.successMessage);
+        const errorMessage = computed(() => notificationStore.errorMessage);
 
         const handleViewCard = (card: Carte) => {
             selectedCard.value = card;
@@ -156,8 +166,11 @@ export default defineComponent({
             closeCreateModal,
             filteredCards,
             isLoading,
+            successMessage,
+            errorMessage,
             cardStore,
-            fetchCards
+            fetchCards,
+            themeId: props.themeIdd
         };
     }
 });

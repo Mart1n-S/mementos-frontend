@@ -4,11 +4,11 @@
             :class="{ 'rotate-y-180': isFlipped }">
             <div
                 class="absolute top-0 left-0 flex items-center justify-center w-full h-full text-white bg-[#40C69F] rounded-lg backface-hidden">
-                <p class="text-[48px]">{{ question }}</p>
+                <p class="text-[22px]">{{ question }}</p>
             </div>
             <div
                 class="absolute top-0 left-0 flex items-center justify-center w-full h-full text-white transform bg-[#FF4F79] rounded-lg rotate-y-180 backface-hidden">
-                <p class="text-[48px]">{{ answer }}</p>
+                <p class="text-[22px]">{{ answer }}</p>
             </div>
         </div>
     </div>
@@ -28,11 +28,15 @@ export default defineComponent({
             required: true,
         },
     },
-    setup(props) {
+    emits: ['flipped'],
+    setup(props, { emit }) {
         const isFlipped = ref(false);
 
         const flipCard = () => {
             isFlipped.value = !isFlipped.value;
+            if (isFlipped.value) {
+                emit('flipped');
+            }
         };
 
         return {

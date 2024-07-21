@@ -1,5 +1,8 @@
 <template>
     <div class="p-4 mb-4">
+        <p v-if="niveau !== undefined" class="mt-2 text-[18px] font-semibold text-center text-gray-700">
+            Niveau : {{ niveau }}
+        </p>
         <p class="mb-2 text-[20px] text-start">Question :</p>
         <div :style="{ backgroundColor: color }" class="p-4 mb-2 text-xl font-semibold rounded">
             {{ question }}
@@ -27,6 +30,10 @@ export default defineComponent({
         color: {
             type: String,
             required: true
+        },
+        niveau: {
+            type: Number,
+            required: false
         }
     },
     setup(props) {

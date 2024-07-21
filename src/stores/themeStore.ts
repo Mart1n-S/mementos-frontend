@@ -30,7 +30,7 @@ export const useThemeStore = defineStore('theme', () => {
     async function fetchUserThemes(userId: number) {
         try {
             const token = localStorage.getItem('access_token');
-            const response = await axios.get<Theme[]>(`/user/${userId}/themes`, {
+            const response = await axios.get<Theme[]>(`/themes/${userId}/user`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -47,17 +47,22 @@ export const useThemeStore = defineStore('theme', () => {
      * @param themeId 
      */
     async function fetchThemeById(themeId: string) {
-        try {
-            const token = localStorage.getItem('access_token');
-            const response = await axios.get<Theme>(`/themes/infos/${themeId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            theme.value = response.data;
-        } catch (error: any) {
-            errorMessage.value = 'Erreur lors de la récupération du thème';
-            console.error('Erreur lors de la récupération du thème:', error);
+        const existingTheme = themes.value.find(theme => theme.id === parseInt(themeId));
+        if (existingTheme) {
+            theme.value = existingTheme;
+        } else {
+            try {
+                const token = localStorage.getItem('access_token');
+                const response = await axios.get<Theme>(`/themes/infos/${themeId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                theme.value = response.data;
+            } catch (error: any) {
+                errorMessage.value = 'Erreur lors de la récupération du thème';
+                console.error('Erreur lors de la récupération du thème:', error);
+            }
         }
     }
 
@@ -147,7 +152,7 @@ export const useThemeStore = defineStore('theme', () => {
     async function duplicateTheme(themeId: number) {
         try {
             const token = localStorage.getItem('access_token');
-            const response = await axios.post(`/duplicate/${themeId}/themes`, {}, {
+            const response = await axios.post(`/themes/duplicate/${themeId}`, {}, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
