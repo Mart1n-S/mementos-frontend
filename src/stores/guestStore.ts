@@ -2,10 +2,11 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import {
     addGuestData, getGuestData, updateGuestDataInDB, clearGuestData, addTheme, getThemes, clearThemes as clearDBThemes,
-    addCard, getCardsByTheme, clearCards as clearDBCards, deleteCard as deleteCardFromDB, deleteTheme as deleteThemeFromDB,
-    addRevision, getRevisionsByCard, clearRevisions as clearDBRevisions, updateCard as updateCardInDB
+    addCard, getCardsByTheme, clearCards as clearDBCards, deleteCard as deleteCardFromDB, deleteTheme as deleteThemeFromDB, deleteCardsByTheme, deleteRevisionsByCardIds,
+    addRevision, getRevisionsByCard, clearRevisions as clearDBRevisions, updateCard as updateCardInDB, updateTheme as updateThemeInDB, getThemeById as getGuestThemeById
 } from '@/utils/indexedDB';
 import { useNotificationStore } from './notificationStore';
+
 export const useGuestStore = defineStore('guest', () => {
     const guestData = ref<{ id?: number; pseudo: string; niveauRevision: number } | null>(null);
     const successMessage = ref<string | null>(null);
@@ -78,6 +79,37 @@ export const useGuestStore = defineStore('guest', () => {
     };
 
     /**
+     * Met à jour un thème en particulier
+     * @param theme
+     */
+    const updateGuestTheme = async (theme: { id: number; nom: string; category_nom: string; couleur: string }) => {
+        try {
+            await updateThemeInDB(theme);
+            await loadThemes();
+            notificationStore.setSuccessMessage('Thème mis à jour avec succès.');
+        } catch (error) {
+            notificationStore.setErrorMessage('Erreur lors de la mise à jour du thème.');
+        }
+    };
+
+    /**
+     * Récupère un thème par son ID
+     * @param themeId
+     */
+    const fetchGuestTheme = async (themeId: number) => {
+        try {
+            const theme = await getGuestThemeById(themeId);
+            if (theme) {
+                return theme;
+            } else {
+                throw new Error('Thème introuvable');
+            }
+        } catch (error) {
+            notificationStore.setErrorMessage('Erreur lors de la récupération du thème.');
+        }
+    };
+
+    /**
      * Charge les thèmes
      */
     const loadThemes = async () => {
@@ -97,8 +129,19 @@ export const useGuestStore = defineStore('guest', () => {
      * @param themeId
      */
     const deleteGuestTheme = async (themeId: number) => {
+        // Supprimer les cartes associées au thème
+        const cards = await getCardsByTheme(themeId);
+        const cardIds = cards.map(card => card.id);
+
+        await deleteCardsByTheme(themeId);
+
+        // Supprimer les révisions associées aux cartes
+        await deleteRevisionsByCardIds(cardIds);
+
+        // Supprimer le thème
         await deleteThemeFromDB(themeId);
-        // Reload themes after deletion
+
+        // Recharger les thèmes après suppression
         await loadThemes();
     };
 
@@ -190,6 +233,8 @@ export const useGuestStore = defineStore('guest', () => {
         isGuest,
         clearGuestData,
         addGuestTheme,
+        updateGuestTheme,
+        fetchGuestTheme,
         loadThemes,
         clearThemes,
         deleteGuestTheme,

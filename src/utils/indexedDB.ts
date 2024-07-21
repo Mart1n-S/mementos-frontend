@@ -85,6 +85,29 @@ export const addTheme = async (theme: { nom: string; category_nom: string; coule
 };
 
 /**
+ * Met à jour un thème en particulier
+ * @param theme
+ */
+export const updateTheme = async (theme: { id: number; nom: string; category_nom: string; couleur: string }) => {
+  const db = await getDB();
+  const tx = db.transaction(THEME_STORE_NAME, 'readwrite');
+  const store = tx.objectStore(THEME_STORE_NAME);
+  await store.put(theme);
+  await tx.done;
+};
+
+/**
+ * Récupère un thème par son ID
+ * @param themeId
+ */
+export const getThemeById = async (themeId: number) => {
+  const db = await getDB();
+  const tx = db.transaction(THEME_STORE_NAME, 'readonly');
+  const store = tx.objectStore(THEME_STORE_NAME);
+  return await store.get(themeId);
+};
+
+/**
  * Récupère les thèmes
  */
 export const getThemes = async () => {
@@ -127,10 +150,9 @@ export const addCard = async (card: { question: string; reponse: string; theme_i
  * Met à jour une carte en particulier
  * @param card
  */
-export const updateCard = async (card: { id: number; question: string; reponse: string }) => {
+export const updateCard = async (card: { id: number; question: string; reponse: string, theme_id: number }) => {
   const db = await getDB();
-  await getCardsByTheme(card.id);
-  return await db.put('cards', card);
+  return await db.put(CARD_STORE_NAME, card);
 };
 
 /**
@@ -148,6 +170,21 @@ export const clearCards = async () => {
   const db = await getDB();
   const tx = db.transaction(CARD_STORE_NAME, 'readwrite');
   tx.objectStore(CARD_STORE_NAME).clear();
+  return tx.done;
+};
+
+/**
+ * Supprime les cartes par thème
+ */
+export const deleteCardsByTheme = async (themeId: number) => {
+  const db = await getDB();
+  const tx = db.transaction(CARD_STORE_NAME, 'readwrite');
+  const store = tx.objectStore(CARD_STORE_NAME);
+  const index = store.index('theme_id');
+  const cards = await index.getAll(IDBKeyRange.only(themeId));
+  for (const card of cards) {
+    store.delete(card.id);
+  }
   return tx.done;
 };
 
@@ -182,5 +219,22 @@ export const clearRevisions = async () => {
   const db = await getDB();
   const tx = db.transaction(REVISION_STORE_NAME, 'readwrite');
   tx.objectStore(REVISION_STORE_NAME).clear();
+  return tx.done;
+};
+
+/**
+ * Supprime les révisions par carte
+ */
+export const deleteRevisionsByCardIds = async (cardIds: number[]) => {
+  const db = await getDB();
+  const tx = db.transaction(REVISION_STORE_NAME, 'readwrite');
+  const store = tx.objectStore(REVISION_STORE_NAME);
+  for (const cardId of cardIds) {
+    const index = store.index('carte_id');
+    const revisions = await index.getAll(IDBKeyRange.only(cardId));
+    for (const revision of revisions) {
+      store.delete(revision.id);
+    }
+  }
   return tx.done;
 };

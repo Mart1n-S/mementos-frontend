@@ -29,7 +29,7 @@
                     <span class="font-medium">Oops!</span> {{ validationErrors.categorie[0] }}
                 </p>
             </div>
-            <div class="mb-6">
+            <div v-if="authStore.isAuthenticated" class="mb-6">
                 <label for="state" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Etat</label>
                 <select v-model="selectedState" id="state" name="state"
                     class="block w-full p-4 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
@@ -61,8 +61,10 @@ import { defineComponent, ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useCategorieStore } from '@/stores/categorieStore';
 import { useThemeStore } from '@/stores/themeStore';
+import { useGuestStore } from '@/stores/guestStore';
 import DeleteCrud from '@/components/DeleteCrud.vue';
 import type { Categorie } from '@/models/Categorie';
+import { useAuthStore } from '@/stores/authStore';
 
 export default defineComponent({
     components: {
@@ -73,6 +75,8 @@ export default defineComponent({
         const router = useRouter();
         const themeStore = useThemeStore();
         const categorieStore = useCategorieStore();
+        const guestStore = useGuestStore();
+        const authStore = useAuthStore();
 
         const themeId = Array.isArray(route.params.themeId) ? route.params.themeId[0] : route.params.themeId;
         const themeName = ref('');
@@ -85,20 +89,37 @@ export default defineComponent({
         onMounted(async () => {
             await categorieStore.fetchCategories();
             categories.value = categorieStore.categories;
-            await themeStore.fetchThemeById(themeId);
-            if (themeStore.theme) {
-                themeName.value = themeStore.theme.nom;
-                selectedCategory.value = themeStore.theme.category_id;
-                selectedState.value = themeStore.theme.public ? 'true' : 'false';
+            if (authStore.isAuthenticated) {
+                await themeStore.fetchThemeById(themeId);
+                if (themeStore.theme) {
+                    themeName.value = themeStore.theme.nom;
+                    selectedCategory.value = themeStore.theme.category_id;
+                    selectedState.value = themeStore.theme.public ? 'true' : 'false';
+                }
+            } else if (guestStore.isGuest) {
+                const theme = await guestStore.fetchGuestTheme(parseInt(themeId));
+                if (theme) {
+                    themeName.value = theme.nom;
+                    selectedCategory.value = categories.value.find(category => category.nom === theme.category_nom)?.id || null;
+                }
             }
         });
 
         const updateTheme = async () => {
-            await themeStore.updateTheme(themeId, {
-                nom: themeName.value,
-                category_id: selectedCategory.value,
-                public: selectedState.value === 'true',
-            });
+            if (authStore.isAuthenticated) {
+                await themeStore.updateTheme(themeId, {
+                    nom: themeName.value,
+                    category_id: selectedCategory.value,
+                    public: selectedState.value === 'true',
+                });
+            } else if (guestStore.isGuest) {
+                await guestStore.updateGuestTheme({
+                    id: parseInt(themeId),
+                    nom: themeName.value,
+                    category_nom: categories.value.find(categorie => categorie.id === selectedCategory.value)?.nom || '',
+                    couleur: categories.value.find(categorie => categorie.id === selectedCategory.value)?.couleur || '',
+                });
+            }
 
             if (!themeStore.validationErrors || Object.keys(themeStore.validationErrors).length === 0) {
                 router.push(`/mes-themes/gestion/${themeId}`);
@@ -131,6 +152,7 @@ export default defineComponent({
             isDeleteModalVisible,
             handleThemeDeleted,
             themeId,
+            authStore
         };
     },
 });
