@@ -27,6 +27,7 @@ onMounted(async () => {
             await revisionStore.fetchUserRevision(authStore.user.id);
         }
     } else if (guestStore.isGuest) {
+        guestStore.loadRevisions(parseInt(themeId));
         theme = guestStore.themes.find(t => t.id === parseInt(themeId));
     }
 
@@ -56,8 +57,7 @@ const handleRevise = async (id: number) => {
     if (authStore.isAuthenticated) {
         await revisionStore.addToMyRevision(id);
     } else if (guestStore.isGuest) {
-        // Handle revision addition logic for guest user
-        // You can customize this part according to your requirements
+        await guestStore.addGuestRevision(id);
     }
 };
 
@@ -65,8 +65,7 @@ const isAlreadyRevised = computed(() => {
     if (authStore.isAuthenticated) {
         return revisionStore.themesRevision.some(theme => theme.id === parseInt(themeId));
     } else if (guestStore.isGuest) {
-        // Add logic to check if theme is already revised for guest users
-        return false;  // Placeholder, implement the logic as needed
+        return guestStore.revisions.some(revision => revision.theme_id === parseInt(themeId));
     }
     return false;
 });

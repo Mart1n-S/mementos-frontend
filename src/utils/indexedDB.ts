@@ -1,7 +1,7 @@
 import { openDB } from 'idb';
 
 const DATABASE_NAME = 'mementos-db';
-const DATABASE_VERSION = 2;
+const DATABASE_VERSION = 3;
 const GUEST_STORE_NAME = 'guest';
 const THEME_STORE_NAME = 'themes';
 const CARD_STORE_NAME = 'cards';
@@ -27,6 +27,7 @@ const dbPromise = openDB(DATABASE_NAME, DATABASE_VERSION, {
     if (!db.objectStoreNames.contains(REVISION_STORE_NAME)) {
       const revisionStore = db.createObjectStore(REVISION_STORE_NAME, { keyPath: 'id', autoIncrement: true });
       revisionStore.createIndex('carte_id', 'carte_id');
+      revisionStore.createIndex('theme_id', 'theme_id');
     }
   },
 });
@@ -199,7 +200,7 @@ export const deleteCard = async (cardId: number) => {
 /**
  * Crée une révision
  */
-export const addRevision = async (revision: { carte_id: number; niveau: number; dateRevision: string; dateDerniereRevision?: string }) => {
+export const addRevision = async (revision: { carte_id: number; theme_id: number; niveau: number; dateRevision: string; dateDerniereRevision?: string | null }) => {
   const db = await getDB();
   return await db.put(REVISION_STORE_NAME, revision);
 };
@@ -211,6 +212,21 @@ export const getRevisionsByCard = async (carte_id: number) => {
   const db = await getDB();
   return await db.getAllFromIndex(REVISION_STORE_NAME, 'carte_id', carte_id);
 };
+
+/**
+ * Récupère les révisions par thème
+ */
+export const getRevisionsByTheme = async (theme_id: number) => {
+  const db = await getDB();
+  const tx = db.transaction(REVISION_STORE_NAME, 'readonly');
+  const store = tx.objectStore(REVISION_STORE_NAME);
+  const index = store.index('theme_id');
+  const revisions = await index.getAll(theme_id);
+  await tx.done;
+  return revisions;
+};
+
+
 
 /**
  * Efface les révisions

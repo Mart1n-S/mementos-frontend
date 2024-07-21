@@ -86,7 +86,6 @@ export default defineComponent({
             if (props.card) {
                 form.value.question = props.card.question;
                 form.value.answer = props.card.reponse;
-                console.log('props.card', props.card);
             } else {
                 form.value.question = '';
                 form.value.answer = '';

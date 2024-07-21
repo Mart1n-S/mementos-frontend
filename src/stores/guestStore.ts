@@ -1,10 +1,12 @@
 import { defineStore } from 'pinia';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import axios from '@/modules/axios';
 import { ref, computed } from 'vue';
 import {
     addGuestData, getGuestData, updateGuestDataInDB, clearGuestData, addTheme, getThemes, clearThemes as clearDBThemes,
     addCard, getCardsByTheme, clearCards as clearDBCards, deleteCard as deleteCardFromDB, deleteTheme as deleteThemeFromDB, deleteCardsByTheme, deleteRevisionsByCardIds,
-    addRevision, getRevisionsByCard, clearRevisions as clearDBRevisions, updateCard as updateCardInDB, updateTheme as updateThemeInDB, getThemeById as getGuestThemeById
+    addRevision, getRevisionsByTheme, clearRevisions as clearDBRevisions, updateCard as updateCardInDB, updateTheme as updateThemeInDB, getThemeById as getGuestThemeById
 } from '@/utils/indexedDB';
 import { useNotificationStore } from './notificationStore';
 
@@ -227,18 +229,36 @@ export const useGuestStore = defineStore('guest', () => {
      * Ajoute une révision
      * @param revision
      */
-    const addGuestRevision = async (revision: { carte_id: number; niveau: number; dateRevision: string; dateDerniereRevision?: string }) => {
-        await addRevision(revision);
-        await loadRevisions(revision.carte_id);
+    const addGuestRevision = async (themeId: number) => {
+        try {
+            const cards = await getCardsByTheme(themeId);
+            const dateRevision = format(new Date(), 'yyyy-MM-dd', { locale: fr });
+            const revisionsToAdd = cards.map(card => ({
+                carte_id: card.id,
+                theme_id: themeId,
+                niveau: 1,
+                dateRevision: dateRevision,
+                dateDerniereRevision: null
+            }));
+
+            for (const revision of revisionsToAdd) {
+                await addRevision(revision);
+            }
+            await loadRevisions(themeId);
+            notificationStore.setSuccessMessage('Les cartes ont été ajoutées aux révisions.');
+        } catch (error) {
+            notificationStore.setErrorMessage('Erreur lors de l\'ajout des cartes aux révisions.');
+            console.error('Erreur lors de l\'ajout des cartes aux révisions:', error);
+        }
+    };
+    /**
+     * Charge les révisions en fonction du thème
+     * @param theme_id
+     */
+    const loadRevisions = async (theme_id: number) => {
+        revisions.value = await getRevisionsByTheme(theme_id);
     };
 
-    /**
-     * Charge les révisions
-     * @param carte_id
-     */
-    const loadRevisions = async (carte_id: number) => {
-        revisions.value = await getRevisionsByCard(carte_id);
-    };
 
     /**
      * Efface les révisions
