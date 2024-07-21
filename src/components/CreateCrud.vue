@@ -57,12 +57,15 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { useCardStore } from '@/stores/cardStore';
-import { useThemeStore } from '@/stores/themeStore';
 
 export default defineComponent({
     props: {
         isVisible: {
             type: Boolean,
+            required: true
+        },
+        themeId: {
+            type: Number,
             required: true
         }
     },
@@ -71,12 +74,11 @@ export default defineComponent({
         const reponse = ref('');
         const validationErrors = ref<{ [key: string]: string[] }>({});
 
-        const themeStore = useThemeStore();
         const cardStore = useCardStore();
 
         const createCard = async () => {
-            if (themeStore.theme) {
-                await cardStore.createCard(themeStore.theme.id, question.value, reponse.value);
+            if (props.themeId) {
+                await cardStore.createCard(props.themeId, question.value, reponse.value);
                 if (!cardStore.validationErrors || Object.keys(cardStore.validationErrors).length === 0) {
                     // Réinitialiser les champs après soumission
                     question.value = '';

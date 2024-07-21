@@ -15,10 +15,10 @@
                             Prochaine révision est dans {{ nextRevisionInDays }} jour{{ nextRevisionInDays === 1 ? '' :
                                 's' }}
                         </button>
-                        <button v-else-if="filteredThemes.length > 0"
+                        <RouterLink v-else-if="filteredThemes.length > 0" to="/mon-mementos/revision"
                             class="w-full px-4 mt-8 py-2 font-bold text-white text-[22px] bg-[#2698E2] md:hover:bg-[#46a9ef] rounded focus:outline-none focus:shadow-outline">
                             Réviser mon Mementos
-                        </button>
+                        </RouterLink>
                         <button v-if="filteredThemes.length > 0" type="button" @click="showDeleteModal"
                             class="w-full px-4 mt-8 py-2 font-bold text-white text-[22px] bg-[#FF4F79] md:hover:bg-[#ff3c87] rounded focus:outline-none focus:shadow-outline">
                             Supprimer mon mementos
@@ -49,6 +49,37 @@
                         </div>
                         <div v-else>
                             <h2 class="mb-8 text-[22px] font-bold">Liste de tous vos thèmes</h2>
+                            <div class="flex p-4 mb-4 text-sm text-blue-800 bg-yellow-100 rounded-lg dark:bg-gray-800 dark:text-blue-400"
+                                role="alert">
+                                <svg class="flex-shrink-0 inline w-4 h-4 me-3 mt-[2px] flex-start" aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                    <path
+                                        d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z" />
+                                </svg>
+                                <span class="sr-only">Info</span>
+                                <div>
+                                    <span class="font-medium">Informations sur les niveaux de révision</span>
+                                    <ul class="mt-1.5 list-disc list-inside text-start space-y-4">
+                                        <li><strong>Niveau 1 :</strong> Révision quotidienne. Chaque carte à ce
+                                            niveau
+                                            doit être révisée
+                                            tous les jours pour renforcer la mémorisation.</li>
+                                        <li><strong>Niveau 2 :</strong> Révision tous les 2 jours. Une fois qu'une
+                                            carte
+                                            est
+                                            correctement rappelée au niveau 1, elle passe au niveau 2 et doit être
+                                            révisée tous les deux
+                                            jours.</li>
+                                        <li><strong>Niveaux ultérieurs :</strong> Chaque niveau suit la formule
+                                            2^(N-1)
+                                            jours.</li>
+
+                                        <li><strong>❗Attention❗</strong>Si vous vous trompez la carte, reviens au
+                                            niveau
+                                            1.</li>
+                                    </ul>
+                                </div>
+                            </div>
                             <div v-if="filteredThemes.length > 0" class="grid grid-cols-1 gap-8 md:grid-cols-2">
                                 <ThemeItem v-for="theme in filteredThemes" :key="theme.id" :theme="theme"
                                     @click="handleThemeClick(theme)" />

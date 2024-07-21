@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import AccueilView from '../views/AccueilView.vue'
 import { useAuthStore } from '@/stores/authStore';
+import { useRevisionStore } from '@/stores/revisionStore';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -40,6 +41,26 @@ const router = createRouter({
       component: () => import('@/views/GestionRevisionsView.vue'),
       props: true,
       meta: { requiresAuth: true }
+    },
+    {
+      path: '/mon-mementos/revision',
+      name: 'revision',
+      component: () => import('@/views/ShowRevision.vue'),
+      meta: { requiresAuth: true },
+      beforeEnter: async (to, from, next) => {
+        const authStore = useAuthStore();
+        const revisionStore = useRevisionStore();
+
+        if (authStore.user !== null) {
+          await revisionStore.fetchUserRevision(authStore.user.id);
+        }
+
+        if (revisionStore.themesRevision.length === 0) {
+          next('/mon-mementos');
+        } else {
+          next();
+        }
+      }
     },
     {
       path: '/creer-themes',

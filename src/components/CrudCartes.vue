@@ -48,7 +48,7 @@
             </div>
             <!-- End block -->
             <!-- Add modal -->
-            <CreateCrud :isVisible="isCreateModalVisible" @close="closeCreateModal" />
+            <CreateCrud :isVisible="isCreateModalVisible" :themeId="parseInt(themeId)" @close="closeCreateModal" />
             <!-- Update modal -->
             <UpdateCrud :isVisible="isUpdateModalVisible" :card="selectedCard" @close="closeUpdateModal" />
             <!-- Read modal -->
@@ -169,7 +169,8 @@ export default defineComponent({
             successMessage,
             errorMessage,
             cardStore,
-            fetchCards
+            fetchCards,
+            themeId: props.themeIdd
         };
     }
 });
