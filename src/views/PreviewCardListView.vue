@@ -16,6 +16,12 @@
                             Dupliquer
                         </button>
                     </div>
+                    <div v-if="guestStore.isGuest" class="flex flex-col w-full space-y-4 md:w-4/12">
+                        <button @click="duplicateCurrentTheme"
+                            class="btn btn-secondary px-4 py-2 rounded-[3px] text-[20px] text-white font-semibold h-[49px] bg-[#FF4F79] md:hover:bg-[#ff3c87]">
+                            Dupliquer
+                        </button>
+                    </div>
                 </div>
 
                 <div class="min-h-screen py-10 bg-white rounded-t-3xl">
@@ -75,6 +81,7 @@ import { useCardStore } from '@/stores/cardStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useThemeStore } from '@/stores/themeStore';
 import { useRevisionStore } from '@/stores/revisionStore';
+import { useGuestStore } from '@/stores/guestStore';
 import CardList from '@/components/CardList.vue';
 import BackButton from '@/components/BackButton.vue';
 import FooterComponent from '@/components/FooterComponent.vue';
@@ -86,6 +93,7 @@ const props = defineProps<{ themeId: number }>();
 const cardStore = useCardStore();
 const authStore = useAuthStore();
 const themeStore = useThemeStore();
+const guestStore = useGuestStore();
 const revisionStore = useRevisionStore();
 const isLoading = ref(true);
 const isLoadingDuplicate = ref(false);
@@ -103,7 +111,11 @@ const duplicateCurrentTheme = async () => {
     if (theme.value) {
         try {
             isLoadingDuplicate.value = true;
-            await themeStore.duplicateTheme(theme.value.id);
+            if (authStore.isAuthenticated) {
+                await themeStore.duplicateTheme(theme.value.id);
+            } else if (guestStore.isGuest) {
+                await guestStore.duplicateThemeForGuest(theme.value.id);
+            }
             isLoadingDuplicate.value = false;
             notificationStore.setSuccessMessage('Le thème a été dupliqué avec succès');
         } catch (error: any) {

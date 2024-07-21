@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import axios from '@/modules/axios';
 import { ref, computed } from 'vue';
 import {
     addGuestData, getGuestData, updateGuestDataInDB, clearGuestData, addTheme, getThemes, clearThemes as clearDBThemes,
@@ -76,6 +77,31 @@ export const useGuestStore = defineStore('guest', () => {
             }
         }
         await loadThemes();
+    };
+
+    /**
+     * Duplique un thème
+     * @param themeId
+     */
+    const duplicateThemeForGuest = async (themeId: number) => {
+        try {
+            const response = await axios.get(`/themes/duplicate/guest/${themeId}`);
+            const theme = response.data.theme;
+            const cards = response.data.cards;
+
+            if (theme && cards) {
+                const newTheme = {
+                    nom: theme.nom,
+                    category_nom: theme.category_nom,
+                    couleur: theme.couleur
+                };
+                await addGuestTheme(newTheme, cards.map((card: any) => ({ question: card.question, reponse: card.reponse })));
+                notificationStore.setSuccessMessage('Thème dupliqué avec succès.');
+            }
+        } catch (error: any) {
+            errorMessage.value = 'Erreur lors de la récupération des thèmes';
+            console.error('Erreur lors de la récupération des thèmes:', error);
+        }
     };
 
     /**
@@ -233,6 +259,7 @@ export const useGuestStore = defineStore('guest', () => {
         isGuest,
         clearGuestData,
         addGuestTheme,
+        duplicateThemeForGuest,
         updateGuestTheme,
         fetchGuestTheme,
         loadThemes,
