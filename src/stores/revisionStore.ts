@@ -11,6 +11,7 @@ export const useRevisionStore = defineStore('revision', () => {
     const nextRevisionInDays = ref<number | null>(null);
     const cardRevisionDisponible = ref<number>(0);
     const cards = ref<Carte[]>([]);
+    const detailCards = ref<any[]>([]);
     const cardsDone = ref(0);
 
     /**
@@ -28,6 +29,7 @@ export const useRevisionStore = defineStore('revision', () => {
             themesRevision.value = response.data.themes;
             nextRevisionInDays.value = response.data.nextRevisionInDays;
             cardRevisionDisponible.value = response.data.cardRevisionDisponible;
+            detailCards.value = response.data.detailCards;
         } catch (error: any) {
             notificationStore.setErrorMessage('Erreur lors de la récupération des révisions de l\'utilisateur');
             console.error('Erreur lors de la récupération des révisions de l\'utilisateur:', error);
@@ -141,5 +143,5 @@ export const useRevisionStore = defineStore('revision', () => {
         }
     }
 
-    return { themesRevision, fetchUserRevision, nextRevisionInDays, cardRevisionDisponible, deleteThemeFromRevision, deleteAllRevisions, addToMyRevision, fetchCardsForToday, cards, updateRevision, cardsDone };
+    return { themesRevision, fetchUserRevision, nextRevisionInDays, cardRevisionDisponible, deleteThemeFromRevision, deleteAllRevisions, addToMyRevision, fetchCardsForToday, cards, updateRevision, cardsDone, detailCards };
 });

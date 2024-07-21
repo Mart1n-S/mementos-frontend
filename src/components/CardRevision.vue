@@ -8,7 +8,7 @@
             </div>
             <div
                 class="absolute top-0 left-0 flex items-center justify-center w-full h-full text-white transform bg-[#FF4F79] rounded-lg rotate-y-180 backface-hidden">
-                <p class="text-[26px]">{{ answer }}</p>
+                <p class="text-[22px]">{{ answer }}</p>
             </div>
         </div>
     </div>

@@ -13,8 +13,10 @@
             <span class="sr-only">Loading...</span>
         </div>
         <div class="grid grid-cols-1 gap-8" v-if="cards.length > 0">
+            <p class="text-center mb-2 text-[18px] font-semibold">Retrouvez le détail de vos cartes révisées, avec leurs
+                niveaux pour suivre votre avancement.</p>
             <CardList v-for="card in cards" :key="card.id" :question="card.question"
-                :color="theme?.couleur ?? '#2698E2'" :reponse="card.reponse" />
+                :color="theme?.couleur ?? '#2698E2'" :reponse="card.reponse" :niveau="card.niveau" />
         </div>
     </div>
 </template>
@@ -22,6 +24,7 @@
 <script lang="ts">
 import { defineComponent, ref, watch, type PropType } from 'vue';
 import { useCardStore } from '@/stores/cardStore';
+import { useRevisionStore } from '@/stores/revisionStore';
 import CardList from '@/components/CardList.vue';
 import type { Theme } from '@/models/Theme';
 
@@ -37,22 +40,28 @@ export default defineComponent({
     },
     setup(props) {
         const cardStore = useCardStore();
+        const revisionStore = useRevisionStore();
         const isLoading = ref(true);
         const isDeleteModalVisible = ref(false);
-        const cards = ref<{ question: string; reponse: string; id: number }[]>([]);
+        const cards = ref<{ question: string; reponse: string; id: number; niveau?: number }[]>([]);
 
         const loadCards = async (themeId: number) => {
             isLoading.value = true;
             // Vérifier si les cartes sont déjà présentes dans le store
-            let themeCards = cardStore.cards.filter(card => card.theme.id === themeId);
+            let revisionCards = revisionStore.detailCards.filter((revision: any) => revision.carte.theme_id === themeId);
 
-            if (themeCards.length === 0) {
+            if (revisionCards.length === 0) {
                 // Si non, les récupérer depuis l'API
                 await cardStore.fetchCardsByTheme(themeId);
-                themeCards = cardStore.cards.filter(card => card.theme.id === themeId);
+                revisionCards = revisionStore.detailCards.filter((revision: any) => revision.carte.theme_id === themeId);
             }
 
-            cards.value = themeCards;
+            cards.value = revisionCards.map((revision: any) => ({
+                question: revision.carte.question,
+                reponse: revision.carte.reponse,
+                id: revision.carte.id,
+                niveau: revision.niveau
+            }));
             isLoading.value = false;
         };
 
