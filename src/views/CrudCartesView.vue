@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
 import { useThemeStore } from '@/stores/themeStore';
 import { useRevisionStore } from '@/stores/revisionStore';
+import { useGuestStore } from '@/stores/guestStore';
 import CrudCartes from '@/components/CrudCartes.vue';
 import BackButton from '@/components/BackButton.vue';
 import FooterComponent from '@/components/FooterComponent.vue';
@@ -14,35 +15,63 @@ const themeId = Array.isArray(route.params.themeId) ? route.params.themeId[0] : 
 const authStore = useAuthStore();
 const themeStore = useThemeStore();
 const revisionStore = useRevisionStore();
+const guestStore = useGuestStore();
 const themeName = ref('');
-const themeSate = ref('');
+const themeState = ref('');
 
 onMounted(async () => {
-    const theme = themeStore.themes.find(t => t.id === parseInt(themeId));
-    if (authStore.user) {
-        await revisionStore.fetchUserRevision(authStore.user.id);
+    let theme;
+    if (authStore.isAuthenticated) {
+        theme = themeStore.themes.find(t => t.id === parseInt(themeId));
+        if (authStore.user) {
+            await revisionStore.fetchUserRevision(authStore.user.id);
+        }
+    } else if (guestStore.isGuest) {
+        theme = guestStore.themes.find(t => t.id === parseInt(themeId));
     }
+
     if (theme) {
         themeName.value = theme.nom;
-        themeSate.value = theme.public == true ? 'Public' : 'Privé';
+        if (authStore.isAuthenticated) {
+            themeState.value = theme.public == true ? 'Public' : 'Privé';
+        }
     } else {
-        // Si le user tape lui-même l'URL, on doit récupérer le thème car pas récupéré par le store précédemment
-        await themeStore.fetchThemeById(themeId);
-        if (themeStore.theme) {
-            themeName.value = themeStore.theme.nom;
-            themeSate.value = themeStore.theme.public == true ? 'Public' : 'Privé';
+        if (authStore.isAuthenticated) {
+            await themeStore.fetchThemeById(themeId);
+            if (themeStore.theme) {
+                themeName.value = themeStore.theme.nom;
+                themeState.value = themeStore.theme.public == true ? 'Public' : 'Privé';
+            }
+        } else if (guestStore.isGuest) {
+            await guestStore.loadThemes();
+            theme = guestStore.themes.find(t => t.id === parseInt(themeId));
+            if (theme) {
+                themeName.value = theme.nom;
+            }
         }
     }
 });
 
 const handleRevise = async (id: number) => {
-    await revisionStore.addToMyRevision(id);
+    if (authStore.isAuthenticated) {
+        await revisionStore.addToMyRevision(id);
+    } else if (guestStore.isGuest) {
+        // Handle revision addition logic for guest user
+        // You can customize this part according to your requirements
+    }
 };
 
 const isAlreadyRevised = computed(() => {
-    return revisionStore.themesRevision.some(theme => theme.id === parseInt(themeId));
+    if (authStore.isAuthenticated) {
+        return revisionStore.themesRevision.some(theme => theme.id === parseInt(themeId));
+    } else if (guestStore.isGuest) {
+        // Add logic to check if theme is already revised for guest users
+        return false;  // Placeholder, implement the logic as needed
+    }
+    return false;
 });
 </script>
+
 
 <template>
     <main>
@@ -51,7 +80,7 @@ const isAlreadyRevised = computed(() => {
                 <div class="flex flex-col items-center justify-center p-4 py-10 text-center text-white">
                     <BackButton />
                     <h1 class="mb-4 text-[50px] font-bold">{{ themeName }}</h1>
-                    <p class="mb-8 font-semibold text-[22px]">Etat : {{ themeSate }}</p>
+                    <p v-if="!guestStore.isGuest" class="mb-8 font-semibold text-[22px]">Etat : {{ themeState }}</p>
                     <div v-if="themeName != ''" class="flex flex-col w-full my-8 space-y-4 md:w-4/12">
                         <button v-if="!isAlreadyRevised" @click="handleRevise(parseInt(themeId))"
                             class="btn btn-primary px-4 py-2 rounded-[3px] text-[20px] text-white font-semibold h-[49px] bg-[#2698E2] md:hover:bg-[#46a9ef]">

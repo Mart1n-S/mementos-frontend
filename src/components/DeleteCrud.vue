@@ -39,9 +39,11 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useCardStore } from '@/stores/cardStore';
+import { useGuestStore } from '@/stores/guestStore';
 import { useThemeStore } from '@/stores/themeStore';
 import { useRevisionStore } from '@/stores/revisionStore';
 import type { PropType } from 'vue';
+import { useAuthStore } from '@/stores/authStore';
 
 export default defineComponent({
     props: {
@@ -67,7 +69,9 @@ export default defineComponent({
         }
     },
     setup(props, { emit }) {
+        const authStore = useAuthStore();
         const cardStore = useCardStore();
+        const guestStore = useGuestStore();
         const themeStore = useThemeStore();
         const revisionStore = useRevisionStore();
 
@@ -77,17 +81,27 @@ export default defineComponent({
 
         const confirmDelete = async () => {
             if (props.cardId !== null) {
-                await cardStore.deleteCard(props.cardId);
+                if (authStore.isAuthenticated) {
+                    await cardStore.deleteCard(props.cardId);
+                } else if (guestStore.isGuest) {
+                    await guestStore.deleteGuestCard(props.cardId);
+                }
                 emit('confirm-delete', props.cardId);
                 closeModal();
                 console.log('Card deleted');
             } else if (props.themeId !== null) {
-                await themeStore.deleteTheme(props.themeId);
+                if (authStore.isAuthenticated) {
+                    await themeStore.deleteTheme(props.themeId);
+                } else if (guestStore.isGuest) {
+                    await guestStore.deleteGuestTheme(props.themeId);
+                }
                 emit('confirm-delete', props.themeId);
+                closeModal();
                 console.log('Theme deleted');
             } else if (props.revisionThemeId !== null) {
                 await revisionStore.deleteThemeFromRevision(props.revisionThemeId);
                 emit('confirm-delete', props.revisionThemeId);
+                closeModal();
                 console.log('Theme deleted from revision');
             } else if (props.deleteAllRevisions) {
                 await revisionStore.deleteAllRevisions();

@@ -57,6 +57,8 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { useCardStore } from '@/stores/cardStore';
+import { useGuestStore } from '@/stores/guestStore';
+import { useAuthStore } from '@/stores/authStore';
 
 export default defineComponent({
     props: {
@@ -74,19 +76,25 @@ export default defineComponent({
         const reponse = ref('');
         const validationErrors = ref<{ [key: string]: string[] }>({});
 
+        const authStore = useAuthStore();
         const cardStore = useCardStore();
+        const guestStore = useGuestStore();
 
         const createCard = async () => {
             if (props.themeId) {
-                await cardStore.createCard(props.themeId, question.value, reponse.value);
-                if (!cardStore.validationErrors || Object.keys(cardStore.validationErrors).length === 0) {
+                if (authStore.isAuthenticated) {
+                    await cardStore.createCard(props.themeId, question.value, reponse.value);
+                    validationErrors.value = cardStore.validationErrors;
+                } else if (guestStore.isGuest) {
+                    await guestStore.addGuestCard({ question: question.value, reponse: reponse.value, theme_id: props.themeId });
+                    validationErrors.value = {};
+                }
+                if (!validationErrors.value || Object.keys(validationErrors.value).length === 0) {
                     // Réinitialiser les champs après soumission
                     question.value = '';
                     reponse.value = '';
                     // Fermer la modale après la création
                     emit('close');
-                } else {
-                    validationErrors.value = cardStore.validationErrors;
                 }
             } else {
                 console.error('Theme ID is not available');

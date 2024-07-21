@@ -43,7 +43,7 @@
                     <span class="font-medium">Oops!</span> {{ validationErrors.nom[0] }}
                 </p>
             </div>
-            <div class="mb-6">
+            <div v-if="!isGuest" class="mb-6">
                 <label for="state" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Etat</label>
                 <select v-model="selectedState" id="state" name="state"
                     class="block w-full p-4 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
@@ -72,12 +72,13 @@
 </template>
 
 <script lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import QuestionReponse from '@/components/QuestionReponse.vue';
 import { useCategorieStore } from '@/stores/categorieStore';
 import { useNotificationStore } from '@/stores/notificationStore';
 import { useThemeStore } from '@/stores/themeStore';
+import { useGuestStore } from '@/stores/guestStore';
 import type { Categorie } from '@/models/Categorie';
 
 export default {
@@ -89,6 +90,7 @@ export default {
         const categorieStore = useCategorieStore();
         const themeStore = useThemeStore();
         const notificationStore = useNotificationStore();
+        const guestStore = useGuestStore();
         const router = useRouter();
         const isLoading = ref(false);
         const categories = ref<Categorie[]>([]);
@@ -106,6 +108,8 @@ export default {
             { question: '', reponse: '' }
         ]);
         const validationErrors = ref<{ [key: string]: string[] }>({});
+
+        const isGuest = computed(() => guestStore.isGuest);
 
         const addCard = () => {
             cards.value.push({ question: '', reponse: '' });
@@ -142,14 +146,29 @@ export default {
 
         const submitForm = async () => {
             isLoading.value = true;
-            await themeStore.createTheme({
-                nom: themeName.value,
-                category_id: selectedCategory.value ? parseInt(selectedCategory.value) : null,
-                public: selectedState.value === 'true',
-                cards: cards.value,
-            });
+            let themeData;
+
+            if (isGuest.value) {
+                const categorie = categories.value.find(categorie => categorie.id === parseInt(selectedCategory.value!));
+                themeData = {
+                    nom: themeName.value,
+                    category_nom: categorie?.nom || '',
+                    couleur: categorie?.couleur || '',
+                };
+                await guestStore.addGuestTheme(themeData, cards.value);
+            } else {
+                themeData = {
+                    nom: themeName.value,
+                    category_id: selectedCategory.value ? parseInt(selectedCategory.value) : null,
+                    public: selectedState.value === 'true',
+                    cards: cards.value,
+                };
+                await themeStore.createTheme(themeData);
+            }
+
             isLoading.value = false;
-            if (!themeStore.validationErrors || Object.keys(themeStore.validationErrors).length === 0) {
+
+            if (isGuest.value || (!themeStore.validationErrors || Object.keys(themeStore.validationErrors).length === 0)) {
                 resetForm();
                 notificationStore.setSuccessMessage('Votre thème a été créé avec succès.');
                 router.push({ name: 'mes-themes' });
@@ -170,7 +189,8 @@ export default {
             updateCard,
             submitForm,
             getCardErrors,
-            isLoading
+            isLoading,
+            isGuest
         };
     },
 };

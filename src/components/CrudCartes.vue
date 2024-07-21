@@ -63,6 +63,7 @@
 <script lang="ts">
 import { defineComponent, ref, computed, watch } from 'vue';
 import { useCardStore } from '@/stores/cardStore';
+import { useGuestStore } from '@/stores/guestStore';
 import { useNotificationStore } from '@/stores/notificationStore';
 import CreateCrud from '@/components/CreateCrud.vue';
 import ListCrud from '@/components/ListCrud.vue';
@@ -71,6 +72,7 @@ import DeleteCrud from '@/components/DeleteCrud.vue';
 import UpdateCrud from '@/components/UpdateCrud.vue';
 import SearchBar from '@/components/SearchBar.vue';
 import type { Carte } from '@/models/Carte';
+import { useAuthStore } from '@/stores/authStore';
 
 export default defineComponent({
     components: {
@@ -88,7 +90,9 @@ export default defineComponent({
         }
     },
     setup(props) {
+        const authStore = useAuthStore();
         const cardStore = useCardStore();
+        const guestStore = useGuestStore();
         const notificationStore = useNotificationStore();
         const selectedCard = ref<Carte | null>(null);
         const isShowModalVisible = ref(false);
@@ -128,19 +132,30 @@ export default defineComponent({
             isUpdateModalVisible.value = false;
         };
 
-
         // Calculer les cartes filtrées en fonction de la recherche
         const filteredCards = computed(() => {
-            return cardStore.cards.filter(card =>
-                card.question.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                card.reponse.toLowerCase().includes(searchQuery.value.toLowerCase())
-            );
+            if (authStore.isAuthenticated) {
+                return cardStore.cards.filter(card =>
+                    card.question.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+                    card.reponse.toLowerCase().includes(searchQuery.value.toLowerCase())
+                );
+            } else if (guestStore.isGuest) {
+                return guestStore.cards.filter(card =>
+                    card.question.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+                    card.reponse.toLowerCase().includes(searchQuery.value.toLowerCase())
+                );
+            }
+            return [];
         });
 
         // Récupérer les cartes en fonction de l'ID du thème
         const fetchCards = async () => {
             isLoading.value = true;
-            await cardStore.fetchCardsOfUser(props.themeIdd);
+            if (authStore.isAuthenticated) {
+                await cardStore.fetchCardsOfUser(props.themeIdd);
+            } else if (guestStore.isGuest) {
+                await guestStore.loadCards(parseInt(props.themeIdd));
+            }
             isLoading.value = false;
         };
 
@@ -169,6 +184,7 @@ export default defineComponent({
             successMessage,
             errorMessage,
             cardStore,
+            guestStore,
             fetchCards,
             themeId: props.themeIdd
         };

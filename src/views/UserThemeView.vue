@@ -49,6 +49,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useThemeStore } from '@/stores/themeStore';
 import { useAuthStore } from '@/stores/authStore';
 import { useNotificationStore } from '@/stores/notificationStore';
+import { useGuestStore } from '@/stores/guestStore';
 import BackButton from '@/components/BackButton.vue';
 import SearchBar from '@/components/SearchBar.vue';
 import ThemeItem from '@/components/ThemeItem.vue';
@@ -58,6 +59,7 @@ import type { Theme } from '@/models/Theme';
 
 const themeStore = useThemeStore();
 const authStore = useAuthStore();
+const guestStore = useGuestStore();
 const notificationStore = useNotificationStore();
 
 const searchQuery = ref('');
@@ -65,10 +67,12 @@ const isLoading = ref(true);
 const router = useRouter();
 const successMessage = computed(() => notificationStore.successMessage);
 const filteredThemes = computed(() => {
-    return themeStore.themes.filter(theme =>
+    return themes.value.filter(theme =>
         theme.nom.toLowerCase().includes(searchQuery.value.toLowerCase())
     );
 });
+
+const themes = ref<Theme[]>([]);
 
 function handleThemeClick(theme: Theme) {
     router.push(`/mes-themes/gestion/${theme.id}`);
@@ -79,13 +83,16 @@ onMounted(async () => {
         isLoading.value = true;
         if (authStore.user) {
             await themeStore.fetchUserThemes(authStore.user.id);
+            themes.value = themeStore.themes;
+        } else if (guestStore.isGuest) {
+            await guestStore.loadThemes();
+            themes.value = guestStore.themes;
         }
     } catch (error) {
-        console.error('Erreur lors de la récupération des thèmes de l\'utilisateur:', error);
+        console.error('Erreur lors de la récupération des thèmes:', error);
     } finally {
         isLoading.value = false;
     }
 });
 </script>
-
 <style scoped></style>

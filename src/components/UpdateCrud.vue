@@ -57,6 +57,8 @@
 <script lang="ts">
 import { defineComponent, ref, watch, toRefs, type PropType } from 'vue';
 import { useCardStore } from '@/stores/cardStore';
+import { useGuestStore } from '@/stores/guestStore';
+import { useAuthStore } from '@/stores/authStore';
 import type { Carte } from '@/models/Carte';
 
 export default defineComponent({
@@ -72,14 +74,19 @@ export default defineComponent({
     },
     setup(props, { emit }) {
         const form = ref({ question: '', answer: '' });
+        const authStore = useAuthStore();
         const cardStore = useCardStore();
-        // Utilisation de toRefs pour rendre les erreurs réactives
+        const guestStore = useGuestStore();
         const { validationErrors } = toRefs(cardStore);
+
+        // Etendre le type Carte localement pour ajouter theme_id
+        type ExtendedCarte = Carte & { theme_id: number };
 
         const resetForm = () => {
             if (props.card) {
                 form.value.question = props.card.question;
                 form.value.answer = props.card.reponse;
+                console.log('props.card', props.card);
             } else {
                 form.value.question = '';
                 form.value.answer = '';
@@ -91,7 +98,7 @@ export default defineComponent({
         }, { immediate: true });
 
         const closeModal = () => {
-            cardStore.validationErrors = {};
+            validationErrors.value = {};
             resetForm();
             emit('close');
         };
@@ -107,7 +114,13 @@ export default defineComponent({
 
         const submitForm = async () => {
             if (props.card) {
-                await cardStore.updateCard(props.card.id, form.value.question, form.value.answer);
+                if (authStore.isAuthenticated) {
+                    await cardStore.updateCard(props.card.id, form.value.question, form.value.answer);
+                    validationErrors.value = cardStore.validationErrors;
+                } else if (guestStore.isGuest) {
+                    const extendedCard = props.card as ExtendedCarte;
+                    await guestStore.updateGuestCard({ id: extendedCard.id, question: form.value.question, reponse: form.value.answer, theme_id: extendedCard.theme_id });
+                }
                 if (!validationErrors.value || Object.keys(validationErrors.value).length === 0) {
                     closeModal();
                     closeDropdowMenuActions();
