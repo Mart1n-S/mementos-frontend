@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import AccueilView from '../views/AccueilView.vue'
 import { useAuthStore } from '@/stores/authStore';
+import { useGuestStore } from '@/stores/guestStore';
 import { useRevisionStore } from '@/stores/revisionStore';
 
 const router = createRouter({
@@ -15,13 +16,19 @@ const router = createRouter({
       path: '/inscription',
       name: 'inscription',
       component: () => import('@/views/InscriptionView.vue'),
-      meta: { requiresGuest: true }
+      meta: { requiresNotAuthenticatedUser: true }
     },
     {
       path: '/connexion',
       name: 'connexion',
       component: () => import('@/views/ConnexionView.vue'),
-      meta: { requiresGuest: true }
+      meta: { requiresVisitor: true }
+    },
+    {
+      path: '/invite',
+      name: 'invite',
+      component: () => import('@/views/GuestView.vue'),
+      meta: { requiresVisitor: true }
     },
     {
       path: '/profil',
@@ -98,7 +105,7 @@ const router = createRouter({
       path: '/reset-password',
       name: 'reset-password',
       component: () => import('@/views/RequestResetPasswordView.vue'),
-      meta: { requiresGuest: true }
+      meta: { requiresVisitor: true }
     },
     {
       path: '/change-password',
@@ -149,24 +156,35 @@ const router = createRouter({
 })
 
 // Ajoute la garde de navigation
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
+  const guestStore = useGuestStore();
 
   // Vérifie l'état d'authentification avant chaque navigation
   authStore.checkAuth();
+  await guestStore.loadGuestData();
 
-  // Vérifie si la route nécessite un accès invité et si l'utilisateur est authentifié
-  if (to.matched.some(record => record.meta.requiresGuest) && authStore.isAuthenticated) {
-    // Redirige vers la page d'accueil si l'utilisateur est déjà authentifié
-    next({ name: 'accueil' });
-  } else if (to.matched.some(record => record.meta.requiresAuth) && !authStore.isAuthenticated) {
-    // Redirige vers la page de connexion si l'utilisateur n'est pas authentifié
-    next({ name: 'connexion' });
+  if (to.matched.some(record => record.meta.requiresVisitor)) {
+    if (authStore.isAuthenticated || guestStore.isGuest) {
+      next({ name: 'accueil' });
+    } else {
+      next();
+    }
+  } else if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (authStore.isAuthenticated || guestStore.isGuest) {
+      next();
+    } else {
+      next({ name: 'connexion' });
+    }
+  } else if (to.matched.some(record => record.meta.requiresNotAuthenticatedUser)) {
+    if (authStore.isAuthenticated) {
+      next({ name: 'accueil' });
+    } else {
+      next();
+    }
   } else {
-    // Poursuivre la navigation
     next();
   }
 });
-
 
 export default router

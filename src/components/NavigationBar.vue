@@ -1,19 +1,28 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
+import { useGuestStore } from '@/stores/guestStore';
 
 export default defineComponent({
     setup() {
         const imageLoaded = ref(false);
         const authStore = useAuthStore();
+        const guestStore = useGuestStore();
 
         onMounted(() => {
             authStore.checkAuth();
+            guestStore.loadGuestData();
         });
+
+        const isAuthenticatedOrGuest = () => {
+            return authStore.isAuthenticated || guestStore.isGuest;
+        };
 
         return {
             imageLoaded,
-            authStore
+            authStore,
+            guestStore,
+            isAuthenticatedOrGuest
         };
     }
 });
@@ -63,24 +72,30 @@ export default defineComponent({
                         </div>
                         <div class="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded shadow dark:bg-gray-700 dark:divide-gray-600"
                             id="dropdown-user">
-                            <div v-if="authStore.isAuthenticated" class="px-4 py-3" role="none">
+                            <div v-if="isAuthenticatedOrGuest()" class="px-4 py-3" role="none">
                                 <p class="text-sm text-gray-900 dark:text-white" role="none">
-                                    {{ authStore.user?.pseudo }}
+                                    {{ authStore.user?.pseudo || guestStore.guestData?.pseudo }}
                                 </p>
-                                <p class="text-sm font-medium text-gray-900 truncate dark:text-gray-300" role="none">
+                                <p v-if="authStore.isAuthenticated"
+                                    class="text-sm font-medium text-gray-900 truncate dark:text-gray-300" role="none">
                                     {{ authStore.user?.email }}
                                 </p>
                             </div>
-                            <ul v-if="authStore.isAuthenticated" class="py-1" role="none">
+                            <ul v-if="isAuthenticatedOrGuest()" class="py-1" role="none">
                                 <li>
                                     <RouterLink to="/profil"
                                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
                                         role="menuitem">Profil</RouterLink>
                                 </li>
-                                <li>
+                                <li v-if="authStore.isAuthenticated">
                                     <button @click="authStore.logout"
                                         class="block w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
                                         role="menuitem">Déconnexion</button>
+                                </li>
+                                <li v-if="!authStore.isAuthenticated">
+                                    <RouterLink to="/inscription"
+                                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600 dark:hover:text-white"
+                                        role="menuitem">Inscription</RouterLink>
                                 </li>
                             </ul>
                             <ul v-else class="py-1" role="none">
@@ -137,7 +152,7 @@ export default defineComponent({
                         <span class="ms-3 text-[20px]">Catégories</span>
                     </RouterLink>
                 </li>
-                <li v-if="authStore.isAuthenticated">
+                <li v-if="isAuthenticatedOrGuest()">
                     <RouterLink to="/mon-mementos"
                         class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <svg class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
@@ -155,7 +170,7 @@ export default defineComponent({
                         <span class="ms-3 text-[20px]">Mon mementos</span>
                     </RouterLink>
                 </li>
-                <li v-if="authStore.isAuthenticated">
+                <li v-if="isAuthenticatedOrGuest()">
                     <RouterLink to="/mes-themes"
                         class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <svg class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
@@ -176,7 +191,7 @@ export default defineComponent({
                         <span class="ms-3 text-[20px]">Mes thèmes</span>
                     </RouterLink>
                 </li>
-                <li v-if="authStore.isAuthenticated">
+                <li v-if="isAuthenticatedOrGuest()">
                     <RouterLink to="/creer-themes"
                         class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <svg class="flex-shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"
@@ -186,7 +201,7 @@ export default defineComponent({
                                 d="M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Zm7 8H7v2h4v4h2v-4h4v-2h-4V7h-2v4Z">
                             </path>
                         </svg>
-                        <span class="ms-3 text-[20px]">Creer un thème</span>
+                        <span class="ms-3 text-[20px]">Créer un thème</span>
                     </RouterLink>
                 </li>
             </ul>

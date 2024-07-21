@@ -2,13 +2,15 @@
     <div class="min-h-screen py-10 bg-white rounded-t-3xl">
         <div class="container flex flex-col items-center justify-center p-4 py-10 text-center">
             <div class="mb-6 text-center">
-                <p class="text-xl font-semibold text-gray-700 dark:text-gray-300"><strong>Pseudo :</strong> {{
-                    authStore.user?.pseudo }}</p>
-                <p class="my-3 text-xl font-semibold text-gray-700 dark:text-gray-300"><strong>Email :</strong> {{
-                    authStore.user?.email }}</p>
-                <p class="text-xl font-semibold text-gray-700 dark:text-gray-300"><strong>Niveau de révision
-                        :</strong> {{
-                            authStore.user?.niveauRevision }}</p>
+                <p class="text-xl font-semibold text-gray-700 dark:text-gray-300">
+                    <strong>Pseudo :</strong> {{ userPseudo }}
+                </p>
+                <p v-if="isAuthenticated" class="my-3 text-xl font-semibold text-gray-700 dark:text-gray-300">
+                    <strong>Email :</strong> {{ authStore.user?.email }}
+                </p>
+                <p class="text-xl font-semibold text-gray-700 dark:text-gray-300">
+                    <strong>Niveau de révision :</strong> {{ userNiveauRevision }}
+                </p>
             </div>
 
             <div class="flex flex-col w-full mt-8 space-y-4 md:w-4/12">
@@ -24,6 +26,10 @@
                     class="btn btn-secondary px-4 py-2 rounded-[3px] text-[20px] text-white font-semibold h-[49px] bg-[#FFA34F] md:hover:bg-[#f8b270]">
                     Créer un mementos
                 </RouterLink>
+                <button v-if="!isAuthenticated" @click="deleteGuestAccount"
+                    class="btn btn-secondary px-4 py-2 rounded-[3px] text-[20px] text-white font-semibold h-[49px] bg-[#ff4f4f] md:hover:bg-[#f87070]">
+                    Supprimer mon compte invité
+                </button>
             </div>
 
         </div>
@@ -31,13 +37,33 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, computed } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
+import { useGuestStore } from '@/stores/guestStore';
+import { useRouter } from 'vue-router';
 
 export default defineComponent({
     setup() {
         const authStore = useAuthStore();
-        return { authStore };
+        const guestStore = useGuestStore();
+        const router = useRouter();
+
+        const isAuthenticated = computed(() => authStore.isAuthenticated);
+
+        const userPseudo = computed(() => {
+            return isAuthenticated.value ? authStore.user?.pseudo : guestStore.guestData?.pseudo;
+        });
+
+        const userNiveauRevision = computed(() => {
+            return isAuthenticated.value ? authStore.user?.niveauRevision : guestStore.guestData?.niveauRevision;
+        });
+
+        const deleteGuestAccount = async () => {
+            await guestStore.deleteAllDataGuest();
+            router.push('/');
+        };
+
+        return { authStore, isAuthenticated, userPseudo, userNiveauRevision, deleteGuestAccount };
     }
 });
 </script>

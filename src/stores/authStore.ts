@@ -3,6 +3,8 @@ import { ref } from 'vue';
 import axios from '@/modules/axios';
 import { useRouter } from 'vue-router';
 import type { User } from '@/models/User';
+import { clearGuestData } from '@/utils/indexedDB';
+import { useGuestStore } from '@/stores/guestStore';
 
 export const useAuthStore = defineStore('auth', () => {
     const router = useRouter();
@@ -11,6 +13,7 @@ export const useAuthStore = defineStore('auth', () => {
     const errorMessage = ref<string | null>(null);
     const validationErrors = ref<{ [key: string]: string }>({});
     const successMessage = ref<string | null>(null);
+    const guestStore = useGuestStore();
 
     /**
      * Récupère les données de l'utilisateur
@@ -64,6 +67,9 @@ export const useAuthStore = defineStore('auth', () => {
 
             if (response.status === 201) {
                 console.log("Inscription réussie !");
+                // Vide les données du visiteur dans indexedDB
+                await clearGuestData();
+                await guestStore.deleteAllDataGuest();
                 const token = response.data.token;
                 localStorage.setItem('access_token', token);
 
@@ -121,6 +127,38 @@ export const useAuthStore = defineStore('auth', () => {
             }
         }
     }
+
+    const updateUser = async (userId: number, formData: { pseudo: string; niveauRevision: number }) => {
+        try {
+            const token = localStorage.getItem('access_token');
+            if (!token) {
+                errorMessage.value = "Vous devez être connecté pour effectuer cette action.";
+                return;
+            }
+
+            const response = await axios.put(
+                `/user/${userId}`,
+                formData,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (response.status === 200) {
+                // Mettre à jour les informations de l'utilisateur dans le store
+                await fetchUser();
+                successMessage.value = "Informations mises à jour avec succès.";
+            }
+        } catch (error: any) {
+            if (error.response.status === 422) {
+                validationErrors.value = error.response.data.errors;
+            } else {
+                errorMessage.value = error.response.data.message || "Une erreur s'est produite lors de la mise à jour.";
+            }
+        }
+    };
 
     /**
      * Envoie une demande de réinitialisation de mot de passe
@@ -245,6 +283,6 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
-    return { isAuthenticated, user, errorMessage, validationErrors, successMessage, login, register, forgotPassword, resetPassword, logout, checkAuth, clearError, clearSuccess, fetchUser, loadUserFromLocalStorage, updateSubscriptionStatus };
+    return { isAuthenticated, user, errorMessage, validationErrors, successMessage, login, register, updateUser, forgotPassword, resetPassword, logout, checkAuth, clearError, clearSuccess, fetchUser, loadUserFromLocalStorage, updateSubscriptionStatus };
 });
 

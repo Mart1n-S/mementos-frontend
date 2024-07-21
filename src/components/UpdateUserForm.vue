@@ -2,11 +2,11 @@
     <div class="flex flex-col items-center min-h-screen py-10 bg-white rounded-t-3xl">
         <h1 class="mb-8 text-5xl font-bold">Modifier le Profil</h1>
         <form class="w-full max-w-md px-4" @submit.prevent="updateUser">
-            <div v-if="authStore.successMessage" class="mb-6 text-center text-green-600">
-                {{ authStore.successMessage }}
+            <div v-if="authStore.successMessage || guestStore.successMessage" class="mb-6 text-center text-green-600">
+                {{ authStore.successMessage || guestStore.successMessage }}
             </div>
-            <div v-if="authStore.errorMessage" class="mb-6 text-center text-red-600">
-                {{ authStore.errorMessage }}
+            <div v-if="authStore.errorMessage || guestStore.errorMessage" class="mb-6 text-center text-red-600">
+                {{ authStore.errorMessage || guestStore.errorMessage }}
             </div>
             <div v-else-if="authStore.validationErrors"
                 class="mt-2 mb-4 text-lg text-center text-red-600 dark:text-red-500">
@@ -79,12 +79,13 @@
 <script lang="ts">
 import { defineComponent, ref, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/authStore';
-import axios from '@/modules/axios';
+import { useGuestStore } from '@/stores/guestStore';
 
 export default defineComponent({
     setup() {
         const isLoading = ref(false);
         const authStore = useAuthStore();
+        const guestStore = useGuestStore();
         const form = ref({
             pseudo: '',
             niveauRevision: 1
@@ -96,50 +97,48 @@ export default defineComponent({
                 form.value.niveauRevision = authStore.user.niveauRevision;
                 authStore.clearError();
                 authStore.successMessage = null;
+            } else if (guestStore.guestData) {
+                form.value.pseudo = guestStore.guestData.pseudo;
+                form.value.niveauRevision = guestStore.guestData.niveauRevision;
+                guestStore.successMessage = null;
+                guestStore.errorMessage = null;
             }
         });
 
         const updateUser = async () => {
             try {
-                const token = localStorage.getItem('access_token');
-                if (!token) {
-                    authStore.errorMessage = "Vous devez être connecté pour effectuer cette action.";
-                    return;
-                }
-
-                const userId = authStore.user?.id;
-                isLoading.value = true;
-                const response = await axios.put(
-                    `/user/${userId}`,
-                    {
+                if (authStore.user) {
+                    const userId = authStore.user?.id;
+                    isLoading.value = true;
+                    await authStore.updateUser(userId, {
                         pseudo: form.value.pseudo,
                         niveauRevision: form.value.niveauRevision,
-                    },
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    }
-                );
-
-                if (response.status === 200) {
-                    // Mettre à jour les informations de l'utilisateur dans le store
-                    await authStore.fetchUser();
+                    });
                     isLoading.value = false;
-                    authStore.successMessage = "Informations mises à jour avec succès.";
+                } else if (guestStore.guestData) {
+                    isLoading.value = true;
+                    await guestStore.updateGuestData({
+                        pseudo: form.value.pseudo,
+                        niveauRevision: form.value.niveauRevision
+                    });
+                    isLoading.value = false;
                 }
             } catch (error: any) {
                 isLoading.value = false;
-                if (error.response.status === 422) {
+                if (error.response && error.response.status === 422) {
                     authStore.validationErrors = error.response.data.errors;
                 } else {
-                    authStore.errorMessage = error.response.data.message || "Une erreur s'est produite lors de la mise à jour.";
+                    const errorMsg = error.response?.data?.message || "Une erreur s'est produite lors de la mise à jour.";
+                    if (authStore.user) {
+                        authStore.errorMessage = errorMsg;
+                    } else if (guestStore.guestData) {
+                        guestStore.errorMessage = errorMsg;
+                    }
                 }
             }
         };
 
-
-        return { form, updateUser, authStore, isLoading };
+        return { form, updateUser, authStore, guestStore, isLoading };
     }
 });
 </script>
