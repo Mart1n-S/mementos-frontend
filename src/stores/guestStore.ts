@@ -6,7 +6,7 @@ import { ref, computed } from 'vue';
 import {
     addGuestData, getGuestData, updateGuestDataInDB, clearGuestData, addTheme, getThemes, clearThemes as clearDBThemes,
     addCard, getCardsByTheme, clearCards as clearDBCards, deleteCard as deleteCardFromDB, deleteTheme as deleteThemeFromDB, deleteCardsByTheme, deleteRevisionsByCardIds,
-    addRevision, getRevisionsByTheme, clearRevisions as clearDBRevisions, updateCard as updateCardInDB, updateTheme as updateThemeInDB, getThemeById as getGuestThemeById
+    addRevision, getRevisionsByTheme, clearRevisions as clearDBRevisions, updateCard as updateCardInDB, updateTheme as updateThemeInDB, getThemeById as getGuestThemeById, getAllRevisions, clearRevisionsByTheme, getAllFromIndex
 } from '@/utils/indexedDB';
 import { useNotificationStore } from './notificationStore';
 
@@ -205,6 +205,14 @@ export const useGuestStore = defineStore('guest', () => {
         cards.value = await getCardsByTheme(theme_id);
     };
 
+    /** 
+     * Charge les cartes en fonction du thème
+     * @param themeId
+     * */
+    const loadGuestCardsByTheme = async (themeId: number) => {
+        return await getAllFromIndex('cards', 'theme_id', themeId);
+    };
+
     /**
      * Efface les cartes
      */
@@ -259,6 +267,57 @@ export const useGuestStore = defineStore('guest', () => {
         revisions.value = await getRevisionsByTheme(theme_id);
     };
 
+    /**
+     * Charge toutes les révisions pour les invités
+     */
+    const loadRevisionsForGuests = async () => {
+        const allRevisions = await getAllRevisions();
+        const allThemes = await getThemes();
+        revisions.value = allRevisions;
+        themes.value = allThemes.filter((theme: any) =>
+            allRevisions.some((revision: any) => revision.theme_id === theme.id)
+        );
+    };
+
+    /**
+     * Supprimer un thème d'une révision
+     * @param themeId
+     */
+    const deleteGuestRevisionsByTheme = async (themeId: number) => {
+        try {
+            await clearRevisionsByTheme(themeId);
+            revisions.value = revisions.value.filter(revision => revision.theme_id !== themeId);
+            notificationStore.setSuccessMessage('Toutes les révisions pour ce thème ont été supprimées.');
+        } catch (error) {
+            notificationStore.setErrorMessage('Erreur lors de la suppression des révisions pour ce thème.');
+            console.error('Erreur lors de la suppression des révisions pour ce thème:', error);
+        }
+    };
+
+    /**
+     * Efface les révisions
+     */
+    const deleteAllRevisionsForGuests = async () => {
+        try {
+            await clearRevisions();
+            revisions.value = [];
+            notificationStore.setSuccessMessage('Toutes les révisions ont été supprimées.');
+        } catch (error) {
+            notificationStore.setErrorMessage('Erreur lors de la suppression des révisions.');
+            console.error('Erreur lors de la suppression des révisions:', error);
+        }
+    };
+
+    const nextRevisionInDays = computed(() => {
+        if (revisions.value.length === 0) return null;
+        const today = new Date();
+        const nextRevisionDates = revisions.value.map(revision => new Date(revision.dateRevision).getTime());
+        const nextRevisionDate = new Date(Math.min(...nextRevisionDates));
+        const diffInTime = nextRevisionDate.getTime() - today.getTime();
+        const diffInDays = Math.ceil(diffInTime / (1000 * 3600 * 24));
+        return diffInDays;
+    });
+
 
     /**
      * Efface les révisions
@@ -292,9 +351,14 @@ export const useGuestStore = defineStore('guest', () => {
         deleteGuestCard,
         addGuestRevision,
         loadRevisions,
+        loadRevisionsForGuests,
+        deleteGuestRevisionsByTheme,
+        deleteAllRevisionsForGuests,
         clearRevisions,
         themes,
         cards,
         revisions,
+        nextRevisionInDays,
+        loadGuestCardsByTheme
     };
 });

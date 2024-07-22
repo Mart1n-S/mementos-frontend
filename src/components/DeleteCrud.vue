@@ -99,12 +99,20 @@ export default defineComponent({
                 closeModal();
                 console.log('Theme deleted');
             } else if (props.revisionThemeId !== null) {
-                await revisionStore.deleteThemeFromRevision(props.revisionThemeId);
+                if (authStore.isAuthenticated) {
+                    await revisionStore.deleteThemeFromRevision(props.revisionThemeId);
+                } else if (guestStore.isGuest) {
+                    await guestStore.deleteGuestRevisionsByTheme(props.revisionThemeId);
+                }
                 emit('confirm-delete', props.revisionThemeId);
                 closeModal();
                 console.log('Theme deleted from revision');
             } else if (props.deleteAllRevisions) {
-                await revisionStore.deleteAllRevisions();
+                if (authStore.isAuthenticated) {
+                    await revisionStore.deleteAllRevisions();
+                } else if (guestStore.isGuest) {
+                    await guestStore.deleteAllRevisionsForGuests();
+                }
                 emit('confirm-delete');
                 closeModal();
             }

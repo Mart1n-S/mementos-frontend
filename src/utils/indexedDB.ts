@@ -213,6 +213,12 @@ export const getRevisionsByCard = async (carte_id: number) => {
   return await db.getAllFromIndex(REVISION_STORE_NAME, 'carte_id', carte_id);
 };
 
+// Méthode pour récupérer toutes les cartes par thème
+export const getAllFromIndex = async (storeName: string, indexName: string, query: any) => {
+  const db = await getDB();
+  return await db.getAllFromIndex(storeName, indexName, query);
+};
+
 /**
  * Récupère les révisions par thème
  */
@@ -226,7 +232,13 @@ export const getRevisionsByTheme = async (theme_id: number) => {
   return revisions;
 };
 
-
+/**
+ * Récupère toutes les révisions
+ */
+export const getAllRevisions = async () => {
+  const db = await getDB();
+  return await db.getAll(REVISION_STORE_NAME);
+};
 
 /**
  * Efface les révisions
@@ -235,6 +247,23 @@ export const clearRevisions = async () => {
   const db = await getDB();
   const tx = db.transaction(REVISION_STORE_NAME, 'readwrite');
   tx.objectStore(REVISION_STORE_NAME).clear();
+  return tx.done;
+};
+
+/**
+ * Supprime les révisions pour un thème
+ */
+export const clearRevisionsByTheme = async (theme_id: number) => {
+  const db = await getDB();
+  const tx = db.transaction(REVISION_STORE_NAME, 'readwrite');
+  const store = tx.objectStore(REVISION_STORE_NAME);
+  const index = store.index('theme_id');
+  const revisions = await index.getAllKeys(theme_id);
+
+  for (const key of revisions) {
+    await store.delete(key);
+  }
+
   return tx.done;
 };
 

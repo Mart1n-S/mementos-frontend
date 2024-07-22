@@ -102,6 +102,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRevisionStore } from '@/stores/revisionStore';
 import { useAuthStore } from '@/stores/authStore';
+import { useGuestStore } from '@/stores/guestStore';
 import { useNotificationStore } from '@/stores/notificationStore';
 import BackButton from '@/components/BackButton.vue';
 import SearchBar from '@/components/SearchBar.vue';
@@ -113,6 +114,7 @@ import DeleteCrud from '@/components/DeleteCrud.vue';
 
 const revisionStore = useRevisionStore();
 const authStore = useAuthStore();
+const guestStore = useGuestStore();
 const notificationStore = useNotificationStore();
 
 const isDeleteModalVisible = ref(false);
@@ -121,10 +123,24 @@ const isLoading = ref(true);
 const router = useRouter();
 const successMessage = computed(() => notificationStore.successMessage);
 const errorMessage = computed(() => notificationStore.errorMessage);
+
+const themesForGuests = computed(() => {
+    const themeIds = guestStore.revisions.map(revision => revision.theme_id);
+    return guestStore.themes.filter(theme => themeIds.includes(theme.id));
+});
+
 const filteredThemes = computed(() => {
-    return revisionStore.themesRevision.filter(theme =>
-        theme.nom.toLowerCase().includes(searchQuery.value.toLowerCase())
-    );
+    const searchQueryLower = searchQuery.value.toLowerCase();
+    if (authStore.isAuthenticated) {
+        return revisionStore.themesRevision.filter(theme =>
+            theme.nom.toLowerCase().includes(searchQueryLower)
+        );
+    } else if (guestStore.isGuest) {
+        return themesForGuests.value.filter(theme =>
+            theme.nom.toLowerCase().includes(searchQueryLower)
+        );
+    }
+    return [];
 });
 
 const nextRevisionInDays = computed(() => revisionStore.nextRevisionInDays);
@@ -150,6 +166,8 @@ onMounted(async () => {
         isLoading.value = true;
         if (authStore.user) {
             await revisionStore.fetchUserRevision(authStore.user.id);
+        } else if (guestStore.isGuest) {
+            await guestStore.loadRevisionsForGuests();
         }
     } catch (error) {
         console.error('Erreur lors de la récupération des révisions de l\'utilisateur:', error);

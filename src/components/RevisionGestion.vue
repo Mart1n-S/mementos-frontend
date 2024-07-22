@@ -25,6 +25,8 @@
 import { defineComponent, ref, watch, type PropType } from 'vue';
 import { useCardStore } from '@/stores/cardStore';
 import { useRevisionStore } from '@/stores/revisionStore';
+import { useGuestStore } from '@/stores/guestStore';
+import { useAuthStore } from '@/stores/authStore';
 import CardList from '@/components/CardList.vue';
 import type { Theme } from '@/models/Theme';
 
@@ -41,27 +43,39 @@ export default defineComponent({
     setup(props) {
         const cardStore = useCardStore();
         const revisionStore = useRevisionStore();
+        const guestStore = useGuestStore();
+        const authStore = useAuthStore();
         const isLoading = ref(true);
         const isDeleteModalVisible = ref(false);
         const cards = ref<{ question: string; reponse: string; id: number; niveau?: number }[]>([]);
 
         const loadCards = async (themeId: number) => {
             isLoading.value = true;
-            // Vérifier si les cartes sont déjà présentes dans le store
-            let revisionCards = revisionStore.detailCards.filter((revision: any) => revision.carte.theme_id === themeId);
 
-            if (revisionCards.length === 0) {
-                // Si non, les récupérer depuis l'API
-                await cardStore.fetchCardsByTheme(themeId);
-                revisionCards = revisionStore.detailCards.filter((revision: any) => revision.carte.theme_id === themeId);
+            if (guestStore.isGuest) {
+                const guestCards = await guestStore.loadGuestCardsByTheme(themeId);
+                cards.value = guestCards.map((card: any) => ({
+                    question: card.question,
+                    reponse: card.reponse,
+                    id: card.id,
+                    niveau: card.niveau
+                }));
+            } else if (authStore.isAuthenticated) {
+                let revisionCards = revisionStore.detailCards.filter((revision: any) => revision.carte.theme_id === themeId);
+
+                if (revisionCards.length === 0) {
+                    await cardStore.fetchCardsByTheme(themeId);
+                    revisionCards = revisionStore.detailCards.filter((revision: any) => revision.carte.theme_id === themeId);
+                }
+
+                cards.value = revisionCards.map((revision: any) => ({
+                    question: revision.carte.question,
+                    reponse: revision.carte.reponse,
+                    id: revision.carte.id,
+                    niveau: revision.niveau
+                }));
             }
 
-            cards.value = revisionCards.map((revision: any) => ({
-                question: revision.carte.question,
-                reponse: revision.carte.reponse,
-                id: revision.carte.id,
-                niveau: revision.niveau
-            }));
             isLoading.value = false;
         };
 

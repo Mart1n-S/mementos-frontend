@@ -34,19 +34,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import FooterComponent from '@/components/FooterComponent.vue';
 import BackButton from '@/components/BackButton.vue';
 import { useRouter } from 'vue-router';
 import RevisionGestion from '@/components/RevisionGestion.vue';
 import { useAuthStore } from '@/stores/authStore';
 import { useRevisionStore } from '@/stores/revisionStore';
+import { useGuestStore } from '@/stores/guestStore';
 import type { Theme } from '@/models/Theme';
 import DeleteCrud from '@/components/DeleteCrud.vue';
 
 const props = defineProps<{ themeId: string }>();
 const isLoading = ref(true);
 const revisionStore = useRevisionStore();
+const guestStore = useGuestStore();
 const authStore = useAuthStore();
 const theme = ref<Theme | null>(null);
 const isDeleteModalVisible = ref(false);
@@ -67,12 +69,32 @@ const handleThemeDeleted = () => {
 onMounted(async () => {
     if (authStore.user) {
         await revisionStore.fetchUserRevision(authStore.user.id);
+        const fetchedThemes = revisionStore.themesRevision.filter(
+            revisionTheme => revisionTheme.id.toString() === props.themeId
+        );
+        theme.value = fetchedThemes.length > 0 ? fetchedThemes[0] : null;
+    } else if (guestStore.isGuest) {
+        await guestStore.loadRevisions(parseInt(props.themeId));
+        const fetchedThemes = guestStore.themes.filter(
+            revisionTheme => revisionTheme.id.toString() === props.themeId
+        );
+        theme.value = fetchedThemes.length > 0 ? fetchedThemes[0] : null;
+        if (theme.value) {
+            localStorage.setItem('theme', JSON.stringify(theme.value));
+        } else {
+            const storedTheme = localStorage.getItem('theme');
+            if (storedTheme) {
+                theme.value = JSON.parse(storedTheme);
+            }
+        }
     }
-    const fetchedThemes = revisionStore.themesRevision.filter(
-        revisionTheme => revisionTheme.id.toString() === props.themeId
-    );
-    theme.value = fetchedThemes.length > 0 ? fetchedThemes[0] : null;
     isLoading.value = false;
+});
+
+onUnmounted(() => {
+    if (guestStore.isGuest) {
+        localStorage.removeItem('theme');
+    }
 });
 </script>
 
