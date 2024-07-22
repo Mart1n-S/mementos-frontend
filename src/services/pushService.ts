@@ -23,21 +23,6 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
   return outputArray;
 }
 
-// Abonne l'utilisateur aux notifications push =>  à supprimer car le service worker est déjà enregistré
-// export async function subscribeUserToPush(): Promise<PushSubscription> {
-//   const registration = await navigator.serviceWorker.register('/sw.ts');
-//   const subscribeOptions = {
-//     userVisibleOnly: true,
-//     applicationServerKey: urlBase64ToUint8Array(
-//       'BEyFGgcn3-4ZrWx2Yd6IX3xoJKzvDN3tQpfbNbMLHp8J4fCnTbFX8mT2Nu6H7MPZX73ky2ZIQkwN_-wfhtDyef4'
-//     ),
-//   };
-
-//   const pushSubscription = await registration.pushManager.subscribe(subscribeOptions);
-//   console.log('Received PushSubscription:', JSON.stringify(pushSubscription));
-//   return pushSubscription;
-// }
-
 // Abonne l'utilisateur aux notifications push
 export async function subscribeUserToPush(): Promise<PushSubscription> {
   const registration = await navigator.serviceWorker.ready;
@@ -69,4 +54,20 @@ export async function sendSubscriptionToBackEnd(subscription: PushSubscription):
   } catch (error) {
     throw new Error('Bad status code from server.');
   }
+}
+
+// Abonne les invités aux notifications push et stocke l'abonnement localement
+export async function subscribeGuestToPush(): Promise<PushSubscription> {
+  const registration = await navigator.serviceWorker.ready;
+  const subscribeOptions = {
+    userVisibleOnly: true,
+    applicationServerKey: urlBase64ToUint8Array(
+      'BEyFGgcn3-4ZrWx2Yd6IX3xoJKzvDN3tQpfbNbMLHp8J4fCnTbFX8mT2Nu6H7MPZX73ky2ZIQkwN_-wfhtDyef4'
+    ),
+  };
+
+  const pushSubscription = await registration.pushManager.subscribe(subscribeOptions);
+  console.log('Received PushSubscription for guest:', JSON.stringify(pushSubscription));
+  localStorage.setItem('guest_push_subscription', JSON.stringify(pushSubscription));
+  return pushSubscription;
 }
