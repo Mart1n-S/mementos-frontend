@@ -143,7 +143,15 @@ const filteredThemes = computed(() => {
     return [];
 });
 
-const nextRevisionInDays = computed(() => revisionStore.nextRevisionInDays);
+// Ajout de la gestion de nextRevisionInDays pour les invités
+const nextRevisionInDays = computed(() => {
+    if (authStore.isAuthenticated) {
+        return revisionStore.nextRevisionInDays;
+    } else if (guestStore.isGuest) {
+        return guestStore.nextRevisionInDays;
+    }
+    return null;
+});
 
 function handleThemeClick(theme: Theme) {
     router.push(`/mon-mementos/gestion/${theme.id}`);

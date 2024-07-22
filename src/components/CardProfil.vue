@@ -59,7 +59,7 @@ export default defineComponent({
         });
 
         const deleteGuestAccount = async () => {
-            await guestStore.deleteAllDataGuest();
+            await guestStore.deleteAllData();
             router.push('/');
         };
 

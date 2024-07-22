@@ -111,7 +111,9 @@ export const useRevisionStore = defineStore('revision', () => {
             });
             cards.value = response.data;
             cardsDone.value = 0;
-        } catch (error) {
+        } catch (error: any) {
+            const errorMessage = error.response?.data?.error || 'Erreur lors de l\'ajout du thème à vos révisions';
+            notificationStore.setErrorMessage(`${errorMessage}`);
             console.error('Failed to fetch cards:', error);
         }
     }

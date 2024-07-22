@@ -7,32 +7,39 @@ import BackButton from '@/components/BackButton.vue';
 import RevisionInteraction from '@/components/RevisionInteraction.vue';
 import Modal from '@/components/ModalRevision.vue';
 import { useAuthStore } from '@/stores/authStore';
+import { useNotificationStore } from '@/stores/notificationStore';
+import { useRouter } from 'vue-router';
 
 const revisionStore = useRevisionStore();
 const guestStore = useGuestStore();
 const authStore = useAuthStore();
+const notificationStore = useNotificationStore();
 
 const isModalVisible = ref(true);
 const numberOfCards = ref<number>(0);
 const isLoading = ref(false);
+const router = useRouter();
 
 const fetchCards = async (numberOfCardsToFetch: number) => {
-
-    isLoading.value = true;
-    isModalVisible.value = false;
-    numberOfCards.value = numberOfCardsToFetch;
-    localStorage.setItem('isModalVisible', 'false');
-    localStorage.setItem('numberOfCards', numberOfCards.value.toString());
-
     if (authStore.user) {
+        isLoading.value = true;
+        isModalVisible.value = false;
+        numberOfCards.value = numberOfCardsToFetch;
+        localStorage.setItem('isModalVisible', 'false');
+        localStorage.setItem('numberOfCards', numberOfCards.value.toString());
+
         await revisionStore.fetchCardsForToday(numberOfCards.value);
+        if (notificationStore.errorMessage !== null) {
+            router.push('/mon-mementos');
+        }
     } else if (guestStore.isGuest) {
+        numberOfCards.value = numberOfCardsToFetch;
+        isModalVisible.value = false;
         await guestStore.fetchGuestCardsForToday(numberOfCards.value);
     }
 
     isLoading.value = false;
 };
-
 onMounted(() => {
     const storedIsModalVisible = localStorage.getItem('isModalVisible');
     const storedNumberOfCards = localStorage.getItem('numberOfCards');

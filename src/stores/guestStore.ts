@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia';
-import { format } from 'date-fns';
+import { format, differenceInCalendarDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import axios from '@/modules/axios';
 import { ref, computed } from 'vue';
 import {
     addGuestData, getGuestData, updateGuestDataInDB, clearGuestData, addTheme, getThemes, clearThemes as clearDBThemes,
     addCard, getCardsByTheme, clearCards as clearDBCards, deleteCard as deleteCardFromDB, deleteTheme as deleteThemeFromDB, deleteCardsByTheme, deleteRevisionsByCardIds,
-    addRevision, getRevisionsByTheme, clearRevisions as clearDBRevisions, updateCard as updateCardInDB, updateTheme as updateThemeInDB, getThemeById as getGuestThemeById, getAllRevisions, clearRevisionsByTheme, getAllFromIndex
+    addRevision, getRevisionsByTheme, clearRevisions as clearDBRevisions, updateCard as updateCardInDB, updateTheme as updateThemeInDB, getThemeById as getGuestThemeById, getAllRevisions, clearRevisionsByTheme, getAllFromIndex, getCardById, updateGuestRevisionInDB, clearAllData
 } from '@/utils/indexedDB';
 import { useNotificationStore } from './notificationStore';
 
@@ -17,8 +17,28 @@ export const useGuestStore = defineStore('guest', () => {
     const themes = ref<any[]>([]);
     const cards = ref<any[]>([]);
     const guestCards = ref<{ carte_id: number; theme_id: number; niveau: number; dateRevision: string; dateDerniereRevision: string | null; }[]>([]);
+    const cardsRevision = ref<{ id: number; question: string; reponse: string; theme_id: number; niveau: number; dateRevision: string; dateDerniereRevision: string | null; }[]>([]);
     const revisions = ref<any[]>([]);
+    const cardsDone = ref<number>(0);
+    const nextRevisionInDays = ref<number | null>(null);
     const notificationStore = useNotificationStore();
+
+    /**
+     * Efface toutes les données
+    */
+    const deleteAllData = async () => {
+        await clearAllData();
+        guestData.value = null;
+        successMessage.value = null;
+        errorMessage.value = null;
+        themes.value = [];
+        cards.value = [];
+        guestCards.value = [];
+        cardsRevision.value = [];
+        revisions.value = [];
+        cardsDone.value = 0;
+        nextRevisionInDays.value = null;
+    };
 
     /**
      * Enregistre les données du visiteur
@@ -27,14 +47,6 @@ export const useGuestStore = defineStore('guest', () => {
     const setGuestData = async (data: { pseudo: string; niveauRevision: number }) => {
         guestData.value = data;
         await addGuestData(data);
-    };
-
-    /**
-     * Efface les données du visiteur
-    */
-    const deleteAllDataGuest = async () => {
-        guestData.value = null;
-        await clearGuestData();
     };
 
     /**
@@ -260,6 +272,7 @@ export const useGuestStore = defineStore('guest', () => {
             console.error('Erreur lors de l\'ajout des cartes aux révisions:', error);
         }
     };
+
     /**
      * Charge les révisions en fonction du thème
      * @param theme_id
@@ -286,6 +299,24 @@ export const useGuestStore = defineStore('guest', () => {
         themes.value = allThemes.filter((theme: any) =>
             allRevisions.some((revision: any) => revision.theme_id === theme.id)
         );
+
+        // Calculer le nombre de jours jusqu'à la prochaine révision
+        const today = format(new Date(), 'yyyy-MM-dd', { locale: fr });
+        const nextRevision = allRevisions.find(revision => revision.dateRevision > today);
+
+        if (nextRevision) {
+            const nextRevisionDate = new Date(nextRevision.dateRevision);
+            const todayDate = new Date(today);
+            nextRevisionInDays.value = differenceInCalendarDays(nextRevisionDate, todayDate);
+        } else {
+            nextRevisionInDays.value = null;
+        }
+
+        // Vérifier si une révision est due aujourd'hui
+        const revisionToday = allRevisions.some(revision => revision.dateRevision === today);
+        if (revisionToday) {
+            nextRevisionInDays.value = null;
+        }
     };
 
     /**
@@ -323,45 +354,39 @@ export const useGuestStore = defineStore('guest', () => {
      */
     const fetchGuestCardsForToday = async (numberOfCards: number) => {
         const today = format(new Date(), 'yyyy-MM-dd', { locale: fr });
-        const cards = await getAllFromIndex('revisions', 'dateRevision', today);
+        const revisions = await getAllFromIndex('revisions', 'dateRevision', today);
 
-        guestCards.value = cards.slice(0, numberOfCards);
-        console.log(cards, guestCards.value);
+        const limitedRevisions = revisions.slice(0, numberOfCards);
+        guestCards.value = limitedRevisions;
+        cardsDone.value = 0;
+
+        // Récupérer les informations complètes des cartes
+        const cardIds = limitedRevisions.map(revision => revision.carte_id);
+        const cards = await Promise.all(cardIds.map(id => getCardById(id)));
+
+        // Normaliser les cartes
+        cardsRevision.value = cards.map(card => ({
+            id: card.id,
+            question: card.question,
+            reponse: card.reponse,
+            theme_id: card.theme_id,
+            niveau: limitedRevisions.find(revision => revision.carte_id === card.id)?.niveau || 1,
+            dateRevision: limitedRevisions.find(revision => revision.carte_id === card.id)?.dateRevision || today,
+            dateDerniereRevision: limitedRevisions.find(revision => revision.carte_id === card.id)?.dateDerniereRevision || null
+        }));
     };
 
-    // const fetchcardRevisionDisponible = async () => {
-    //     const today = format(new Date(), 'yyyy-MM-dd', { locale: fr });
-    //     const cards = await getAllFromIndex('revisions', 'dateRevision', today);
-    //     return cards.length;
-    // };
+    /**
+     * Met à jour une révision en particulier
+     */
+    const updateGuestRevision = async (cardId: number, isCorrect: boolean) => {
+        await updateGuestRevisionInDB(cardId, isCorrect);
+        // Mettre à jour les cartes faites pour le suivi de la progression
+        cardsDone.value++;
 
-    // const updateGuestRevision = async (cardId: number, isCorrect: boolean) => {
-    //     const revision = await db.getFromIndex('revisions', 'carte_id', cardId);
-    //     const today = format(new Date(), 'yyyy-MM-dd', { locale: fr });
-    //     if (revision) {
-    //         revision.niveau = isCorrect ? revision.niveau + 1 : 1;
-    //         revision.dateRevision = isCorrect ? calculateNextRevisionDate(revision.niveau) : today;
-    //         await db.put('revisions', revision);
-    //     }
-    // };
-
-    // const calculateNextRevisionDate = (niveau: number) => {
-    //     const days = Math.pow(2, niveau - 1);
-    //     const nextDate = new Date();
-    //     nextDate.setDate(nextDate.getDate() + days);
-    //     return format(nextDate, 'yyyy-MM-dd', { locale: fr });
-    // };
-
-    const nextRevisionInDays = computed(() => {
-        if (revisions.value.length === 0) return null;
-        const today = new Date();
-        const nextRevisionDates = revisions.value.map(revision => new Date(revision.dateRevision).getTime());
-        const nextRevisionDate = new Date(Math.min(...nextRevisionDates));
-        const diffInTime = nextRevisionDate.getTime() - today.getTime();
-        const diffInDays = Math.ceil(diffInTime / (1000 * 3600 * 24));
-        return diffInDays;
-    });
-
+        // Supprimer la carte révisée de la liste des cartes à réviser
+        guestCards.value = guestCards.value.filter(card => card.carte_id !== cardId);
+    };
 
     /**
      * Efface les révisions
@@ -376,7 +401,6 @@ export const useGuestStore = defineStore('guest', () => {
         successMessage,
         errorMessage,
         setGuestData,
-        deleteAllDataGuest,
         loadGuestData,
         updateGuestData,
         isGuest,
@@ -407,6 +431,9 @@ export const useGuestStore = defineStore('guest', () => {
         nextRevisionInDays,
         loadGuestCardsByTheme,
         guestCards,
-        // fetchcardRevisionDisponible
+        updateGuestRevision,
+        cardsRevision,
+        cardsDone,
+        deleteAllData
     };
 });

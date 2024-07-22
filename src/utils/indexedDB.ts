@@ -35,6 +35,9 @@ const dbPromise = openDB(DATABASE_NAME, DATABASE_VERSION, {
   },
 });
 
+// Niveau maximum global
+const MAX_LEVEL = 7;
+
 /**
  * Récupère la base de données
  */
@@ -74,6 +77,24 @@ export const clearGuestData = async () => {
   const tx = db.transaction(GUEST_STORE_NAME, 'readwrite');
   tx.objectStore(GUEST_STORE_NAME).clear();
   return tx.done;
+};
+
+/**
+ * Efface toutes les données de la base de données
+ */
+export const clearAllData = async () => {
+  const db = await getDB();
+  const transaction = db.transaction(
+    [GUEST_STORE_NAME, THEME_STORE_NAME, CARD_STORE_NAME, REVISION_STORE_NAME],
+    'readwrite'
+  );
+
+  transaction.objectStore(GUEST_STORE_NAME).clear();
+  transaction.objectStore(THEME_STORE_NAME).clear();
+  transaction.objectStore(CARD_STORE_NAME).clear();
+  transaction.objectStore(REVISION_STORE_NAME).clear();
+
+  return transaction.done;
 };
 
 /**
@@ -168,6 +189,24 @@ export const getCardsByTheme = async (theme_id: number) => {
 };
 
 /**
+ * Récupère une carte par son ID
+ */
+export const getCardById = async (cardId: number) => {
+  const db = await getDB();
+  const tx = db.transaction(CARD_STORE_NAME, 'readonly');
+  const store = tx.objectStore(CARD_STORE_NAME);
+  return await store.get(cardId);
+};
+
+/**
+ * Méthode pour récupérer toutes les cartes par thème
+ */
+export const getAllFromIndex = async (storeName: string, indexName: string, query: any) => {
+  const db = await getDB();
+  return await db.getAllFromIndex(storeName, indexName, query);
+};
+
+/**
  * Efface les cartes
  */
 export const clearCards = async () => {
@@ -214,12 +253,6 @@ export const addRevision = async (revision: { carte_id: number; theme_id: number
 export const getRevisionsByCard = async (carte_id: number) => {
   const db = await getDB();
   return await db.getAllFromIndex(REVISION_STORE_NAME, 'carte_id', carte_id);
-};
-
-// Méthode pour récupérer toutes les cartes par thème
-export const getAllFromIndex = async (storeName: string, indexName: string, query: any) => {
-  const db = await getDB();
-  return await db.getAllFromIndex(storeName, indexName, query);
 };
 
 /**
@@ -297,16 +330,25 @@ export const getRevisionsCountByDate = async (date: string) => {
 };
 
 /**
- * Met à jour une révision en particulier
+ * Met à jour la révision de l'invité dans la base de données
  */
 export const updateGuestRevisionInDB = async (cardId: number, isCorrect: boolean) => {
   const db = await dbPromise;
   const revision = await db.getFromIndex(REVISION_STORE_NAME, 'carte_id', cardId);
   const today = format(new Date(), 'yyyy-MM-dd', { locale: fr });
 
+  // Récupère les données de l'invité pour obtenir le niveau maximum choisi
+  const guestData = await db.getAll(GUEST_STORE_NAME);
+  const guestMaxLevel = guestData[0]?.niveauRevision || MAX_LEVEL;
+
   if (revision) {
-    revision.niveau = isCorrect ? revision.niveau + 1 : 1;
-    revision.dateRevision = isCorrect ? calculateNextRevisionDate(revision.niveau) : today;
+    if (isCorrect) {
+      revision.niveau = Math.min(revision.niveau + 1, guestMaxLevel);
+    } else {
+      revision.niveau = 1;
+    }
+    revision.dateRevision = calculateNextRevisionDate(revision.niveau);
+    revision.dateDerniereRevision = today;
     await db.put(REVISION_STORE_NAME, revision);
   }
 };

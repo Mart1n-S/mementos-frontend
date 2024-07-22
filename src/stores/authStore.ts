@@ -3,7 +3,6 @@ import { ref } from 'vue';
 import axios from '@/modules/axios';
 import { useRouter } from 'vue-router';
 import type { User } from '@/models/User';
-import { clearGuestData } from '@/utils/indexedDB';
 import { useGuestStore } from '@/stores/guestStore';
 
 export const useAuthStore = defineStore('auth', () => {
@@ -67,9 +66,8 @@ export const useAuthStore = defineStore('auth', () => {
 
             if (response.status === 201) {
                 console.log("Inscription réussie !");
-                // Vide les données du visiteur dans indexedDB
-                await clearGuestData();
-                await guestStore.deleteAllDataGuest();
+                // Supprime toutes les données de l'invité dans indexedDB et guestStore
+                await guestStore.deleteAllData();
                 const token = response.data.token;
                 localStorage.setItem('access_token', token);
 
