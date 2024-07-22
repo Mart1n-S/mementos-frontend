@@ -1,4 +1,6 @@
 import { openDB } from 'idb';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 const DATABASE_NAME = 'mementos-db';
 const DATABASE_VERSION = 3;
@@ -28,6 +30,7 @@ const dbPromise = openDB(DATABASE_NAME, DATABASE_VERSION, {
       const revisionStore = db.createObjectStore(REVISION_STORE_NAME, { keyPath: 'id', autoIncrement: true });
       revisionStore.createIndex('carte_id', 'carte_id');
       revisionStore.createIndex('theme_id', 'theme_id');
+      revisionStore.createIndex('dateRevision', 'dateRevision');
     }
   },
 });
@@ -282,4 +285,38 @@ export const deleteRevisionsByCardIds = async (cardIds: number[]) => {
     }
   }
   return tx.done;
+};
+
+/**
+ * Récupère les révisions par date
+ */
+export const getRevisionsCountByDate = async (date: string) => {
+  const db = await getDB();
+  const revisions = await db.getAllFromIndex(REVISION_STORE_NAME, 'dateRevision', date);
+  return revisions.length;
+};
+
+/**
+ * Met à jour une révision en particulier
+ */
+export const updateGuestRevisionInDB = async (cardId: number, isCorrect: boolean) => {
+  const db = await dbPromise;
+  const revision = await db.getFromIndex(REVISION_STORE_NAME, 'carte_id', cardId);
+  const today = format(new Date(), 'yyyy-MM-dd', { locale: fr });
+
+  if (revision) {
+    revision.niveau = isCorrect ? revision.niveau + 1 : 1;
+    revision.dateRevision = isCorrect ? calculateNextRevisionDate(revision.niveau) : today;
+    await db.put(REVISION_STORE_NAME, revision);
+  }
+};
+
+/**
+ * Méthode pour calculer la prochaine date de révision
+ */
+const calculateNextRevisionDate = (niveau: number) => {
+  const days = Math.pow(2, niveau - 1);
+  const nextDate = new Date();
+  nextDate.setDate(nextDate.getDate() + days);
+  return format(nextDate, 'yyyy-MM-dd', { locale: fr });
 };

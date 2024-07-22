@@ -3,6 +3,8 @@ import AccueilView from '../views/AccueilView.vue'
 import { useAuthStore } from '@/stores/authStore';
 import { useGuestStore } from '@/stores/guestStore';
 import { useRevisionStore } from '@/stores/revisionStore';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -57,15 +59,24 @@ const router = createRouter({
       beforeEnter: async (to, from, next) => {
         const authStore = useAuthStore();
         const revisionStore = useRevisionStore();
+        const guestStore = useGuestStore();
+
+        const today = format(new Date(), 'yyyy-MM-dd', { locale: fr });
 
         if (authStore.user !== null) {
           await revisionStore.fetchUserRevision(authStore.user.id);
+        } else if (guestStore.isGuest) {
+          await guestStore.loadRevisionsByDate(today);
         }
 
-        if (revisionStore.themesRevision.length === 0) {
-          next('/mon-mementos');
-        } else {
+        const hasRevisions = authStore.user !== null
+          ? revisionStore.themesRevision.length !== 0
+          : guestStore.revisions.some(revision => revision.dateRevision === today);
+
+        if (hasRevisions) {
           next();
+        } else {
+          next('/mon-mementos');
         }
       }
     },

@@ -19,11 +19,14 @@
         </div>
     </div>
 </template>
-
-
 <script lang="ts">
-import { ref, defineComponent } from 'vue';
+import { ref, defineComponent, onMounted } from 'vue';
 import { useRevisionStore } from '@/stores/revisionStore';
+import { useGuestStore } from '@/stores/guestStore';
+import { useAuthStore } from '@/stores/authStore';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+import { getRevisionsCountByDate } from '@/utils/indexedDB';
 
 export default defineComponent({
     props: {
@@ -35,7 +38,23 @@ export default defineComponent({
     emits: ['confirm'],
     setup(props, { emit }) {
         const revisionStore = useRevisionStore();
+        const guestStore = useGuestStore();
+        const authStore = useAuthStore();
         const numberOfCards = ref(1);
+        const cardRevisionDisponible = ref(0);
+
+        onMounted(() => {
+            fetchCardRevisionDisponible();
+        });
+
+        const fetchCardRevisionDisponible = async () => {
+            if (authStore.isAuthenticated) {
+                cardRevisionDisponible.value = revisionStore.cardRevisionDisponible;
+            } else if (guestStore.isGuest) {
+                const today = format(new Date(), 'yyyy-MM-dd', { locale: fr });
+                cardRevisionDisponible.value = await getRevisionsCountByDate(today);
+            }
+        };
 
         const confirm = () => {
             emit('confirm', numberOfCards.value);
@@ -44,10 +63,11 @@ export default defineComponent({
         return {
             numberOfCards,
             confirm,
-            cardRevisionDisponible: revisionStore.cardRevisionDisponible
+            cardRevisionDisponible
         };
     }
 });
 </script>
+
 
 <style scoped></style>

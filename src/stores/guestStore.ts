@@ -16,6 +16,7 @@ export const useGuestStore = defineStore('guest', () => {
     const errorMessage = ref<string | null>(null);
     const themes = ref<any[]>([]);
     const cards = ref<any[]>([]);
+    const guestCards = ref<{ carte_id: number; theme_id: number; niveau: number; dateRevision: string; dateDerniereRevision: string | null; }[]>([]);
     const revisions = ref<any[]>([]);
     const notificationStore = useNotificationStore();
 
@@ -268,6 +269,14 @@ export const useGuestStore = defineStore('guest', () => {
     };
 
     /**
+     * Charge toutes les révisions
+     */
+    const loadRevisionsByDate = async (date: string) => {
+        const allRevisions = await getAllRevisions();
+        revisions.value = allRevisions.filter(revision => revision.dateRevision === date);
+    };
+
+    /**
      * Charge toutes les révisions pour les invités
      */
     const loadRevisionsForGuests = async () => {
@@ -307,6 +316,41 @@ export const useGuestStore = defineStore('guest', () => {
             console.error('Erreur lors de la suppression des révisions:', error);
         }
     };
+
+    /**
+     * Charge les cartes pour les invités
+     * @param numberOfCards
+     */
+    const fetchGuestCardsForToday = async (numberOfCards: number) => {
+        const today = format(new Date(), 'yyyy-MM-dd', { locale: fr });
+        const cards = await getAllFromIndex('revisions', 'dateRevision', today);
+
+        guestCards.value = cards.slice(0, numberOfCards);
+        console.log(cards, guestCards.value);
+    };
+
+    // const fetchcardRevisionDisponible = async () => {
+    //     const today = format(new Date(), 'yyyy-MM-dd', { locale: fr });
+    //     const cards = await getAllFromIndex('revisions', 'dateRevision', today);
+    //     return cards.length;
+    // };
+
+    // const updateGuestRevision = async (cardId: number, isCorrect: boolean) => {
+    //     const revision = await db.getFromIndex('revisions', 'carte_id', cardId);
+    //     const today = format(new Date(), 'yyyy-MM-dd', { locale: fr });
+    //     if (revision) {
+    //         revision.niveau = isCorrect ? revision.niveau + 1 : 1;
+    //         revision.dateRevision = isCorrect ? calculateNextRevisionDate(revision.niveau) : today;
+    //         await db.put('revisions', revision);
+    //     }
+    // };
+
+    // const calculateNextRevisionDate = (niveau: number) => {
+    //     const days = Math.pow(2, niveau - 1);
+    //     const nextDate = new Date();
+    //     nextDate.setDate(nextDate.getDate() + days);
+    //     return format(nextDate, 'yyyy-MM-dd', { locale: fr });
+    // };
 
     const nextRevisionInDays = computed(() => {
         if (revisions.value.length === 0) return null;
@@ -351,14 +395,18 @@ export const useGuestStore = defineStore('guest', () => {
         deleteGuestCard,
         addGuestRevision,
         loadRevisions,
+        loadRevisionsByDate,
         loadRevisionsForGuests,
         deleteGuestRevisionsByTheme,
         deleteAllRevisionsForGuests,
+        fetchGuestCardsForToday,
         clearRevisions,
         themes,
         cards,
         revisions,
         nextRevisionInDays,
-        loadGuestCardsByTheme
+        loadGuestCardsByTheme,
+        guestCards,
+        // fetchcardRevisionDisponible
     };
 });

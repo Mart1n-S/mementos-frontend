@@ -1,26 +1,38 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRevisionStore } from '@/stores/revisionStore';
+import { useGuestStore } from '@/stores/guestStore';
 import FooterComponent from '@/components/FooterComponent.vue';
 import BackButton from '@/components/BackButton.vue';
 import RevisionInteraction from '@/components/RevisionInteraction.vue';
 import Modal from '@/components/ModalRevision.vue';
+import { useAuthStore } from '@/stores/authStore';
 
 const revisionStore = useRevisionStore();
+const guestStore = useGuestStore();
+const authStore = useAuthStore();
 
 const isModalVisible = ref(true);
 const numberOfCards = ref<number>(0);
 const isLoading = ref(false);
 
 const fetchCards = async (numberOfCardsToFetch: number) => {
+
     isLoading.value = true;
     isModalVisible.value = false;
     numberOfCards.value = numberOfCardsToFetch;
     localStorage.setItem('isModalVisible', 'false');
     localStorage.setItem('numberOfCards', numberOfCards.value.toString());
-    await revisionStore.fetchCardsForToday(numberOfCards.value);
+
+    if (authStore.user) {
+        await revisionStore.fetchCardsForToday(numberOfCards.value);
+    } else if (guestStore.isGuest) {
+        await guestStore.fetchGuestCardsForToday(numberOfCards.value);
+    }
+
     isLoading.value = false;
 };
+
 onMounted(() => {
     const storedIsModalVisible = localStorage.getItem('isModalVisible');
     const storedNumberOfCards = localStorage.getItem('numberOfCards');
@@ -63,8 +75,10 @@ onUnmounted(() => {
                         <span class="sr-only">Loading...</span>
                     </div>
                     <div v-else class="container px-4 mx-auto text-center sm:px-6">
-                        <RevisionInteraction v-if="!isModalVisible && revisionStore.cards.length > 0" />
-                        <div v-if="!isModalVisible && revisionStore.cards.length <= 0">
+                        <RevisionInteraction
+                            v-if="!isModalVisible && (revisionStore.cards.length > 0 || guestStore.guestCards.length > 0)" />
+                        <div
+                            v-if="!isModalVisible && (revisionStore.cards.length <= 0 && guestStore.guestCards.length <= 0)">
                             <p class="text-center mb-8 text-[24px] font-semibold">Révision du jour terminée. <br>🧙‍♂️
                                 Bravo !</p>
                             <RouterLink to="/mon-mementos"
