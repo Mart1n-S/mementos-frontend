@@ -1,61 +1,99 @@
-# mementos-frontend
+<p align="center"><a href="https://laravel.com" target="_blank"><img src=".github/images/vuejs-icon.svg" width="100" alt="Laravel Logo"></a></p>
 
-This template should help get you started developing with Vue 3 in Vite.
+<h1 align="center">MEMENTOS (Frontend)</h1><br>
 
-## Recommended IDE Setup
+# Projet de Mémorisation </br> Basée sur la Répétition Espacée🧙‍♂️
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+L'objectif de ce projet est de concevoir et développer une application de mémorisation basée sur la répétition espacée. Le principe de la répétition espacée est détaillé [ici](https://ncase.me/remember/fr.html).
 
-## Type Support for `.vue` Imports in TS
+Cette application permet à l'utilisateur de créer un programme de révision personnalisé. Les utilisateurs choisissent le nombre de cartes à réviser chaque jour selon une formule de progression exponentielle, `2^(N-1)`, où `N` est le niveau de révision des cartes. Par exemple, si un utilisateur commence avec 30 cartes et décide de réviser 20 cartes, et se trompe sur toutes, toutes les cartes restent au niveau 1 pour être révisées à nouveau le lendemain. Le processus de révision ajuste le niveau des cartes en fonction des performances de l'utilisateur, permettant une révision personnalisée et efficace basée sur la méthode de répétition espacée.
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+## Fonctionnalités 🛠️
 
-## Customize configuration
+- **Inscription et authentification** : Les utilisateurs peuvent s'inscrire et se connecter pour accéder à leurs programmes de révision personnalisés. Une option pour continuer en tant qu'invité est également disponible, permettant l'accès limité aux fonctionnalités sans enregistrement.
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+- **Création et gestion de thèmes et cartes** : Les utilisateurs peuvent créer des thèmes pour organiser leurs cartes de révision. Chaque thème peut contenir plusieurs cartes, chacune avec une question et une réponse.
 
-## Project Setup
+- **Duplication de thèmes publics** : Les utilisateurs peuvent dupliquer des thèmes publics créés par d'autres utilisateurs. Cela permet de personnaliser et d'utiliser le contenu existant pour leurs propres révisions.
 
-```sh
-npm install
-```
+- **Révision de thèmes** : Les utilisateurs peuvent réviser leurs thèmes ou des thèmes publics. Le système ajuste le niveau de difficulté des cartes en fonction des performances des utilisateurs, utilisant le principe de la répétition espacée.
 
-### Compile and Hot-Reload for Development
+- **Notifications** : Les utilisateurs peuvent s'abonner aux notifications pour recevoir des rappels concernant leurs sessions de révision programmées.
 
-```sh
-npm run dev
-```
+- **Accessible en mode hors connexion PWA** : En tant que PWA, l'application peut être utilisée sans connexion Internet, permettant aux utilisateurs de réviser leurs cartes n'importe où et à n'importe quel moment.
 
-### Type-Check, Compile and Minify for Production
+## Technologies Utilisées 💻
 
-```sh
-npm run build
-```
+### Frontend
 
-### Run Unit Tests with [Vitest](https://vitest.dev/)
+- **Vue.js** : Version 3.4.29
 
-```sh
-npm run test:unit
-```
+### Backend
 
-### Run End-to-End Tests with [Cypress](https://www.cypress.io/)
+- **Laravel** : Version 10.10
 
-```sh
-npm run test:e2e:dev
-```
+- **MySQL** : Version 8.3
 
-This runs the end-to-end tests against the Vite development server.
-It is much faster than the production build.
+- **Mailpit** : Utilisé en développement pour tester l'envoi d'emails sans les envoyer réellement aux utilisateurs finaux.
 
-But it's still recommended to test the production build with `test:e2e` before deploying (e.g. in CI environments):
+### Infrastructure
 
-```sh
-npm run build
-npm run test:e2e
-```
+- **Docker** : Utilisé pour conteneuriser l'application, garantissant que l'environnement de développement est répliqué de manière fiable en production.
 
-### Lint with [ESLint](https://eslint.org/)
+## Installation et Configuration ⚗️
 
-```sh
-npm run lint
-```
+Suivez ces étapes pour configurer l'environnement de développement de l'application sur votre système local.
+
+### Étapes d'Installation
+
+1. **Clonage du dépôt**
+
+   Clonez le dépôt Git en utilisant la commande suivante :
+
+   ```bash
+   git clone https://github.com/Mart1n-S/mementos-frontend.git
+   cd mementos-frontend
+   ```
+
+   ⚠️ Pour tester l'application avec la fonctionnalité <strong>'invité'</strong>, changez pour la branche spécifique en exécutant :
+
+   ```bash
+   git checkout userGuest
+   ```
+
+2. **Installation des dépendances**
+
+   Installez toutes les dépendances nécessaires à l'aide de npm :
+
+   ```bash
+   npm install
+   ```
+
+3. **Monter les containers**
+
+   Lancez les containers Docker nécessaires pour le projet avec Docker Compose.
+
+   ```bash
+   docker-compose up -d
+   ```
+
+## Pour la configuration du backend
+
+> [GitHub mementos-backend](https://github.com/Mart1n-S/mementos-backend)
+
+## Accéder à l'application 🧪
+
+> http://localhost:5173/
+
+## Petit aperçu 👀
+
+<table>
+  <tr>
+    <td><img src=".github/images/view1.png" width="250" alt="vue site"/></td>
+    <td><img src=".github/images/view2.png" width="250" alt="vue site 2"/></td>
+  </tr>
+  <tr>
+    <td><img src=".github/images/view3.png" width="250" alt="vue site 3"/></td>
+    <td><img src=".github/images/view4.png" width="250" alt="vue site 4"/></td>
+  </tr>
+</table>
