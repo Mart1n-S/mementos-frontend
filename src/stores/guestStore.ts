@@ -38,6 +38,7 @@ export const useGuestStore = defineStore('guest', () => {
         revisions.value = [];
         cardsDone.value = 0;
         nextRevisionInDays.value = null;
+        localStorage.removeItem('guest_push_subscription');
     };
 
     /**
