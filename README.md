@@ -44,7 +44,8 @@ Cette application permet à l'utilisateur de créer un programme de révision pe
 
 Suivez ces étapes pour configurer l'environnement de développement de l'application sur votre système local.
 ### Prérequis 
-🐋 Docker Desktop
+🐋 Docker Desktop </br>
+🟢 Node.js
 
 ### Étapes d'Installation
 
