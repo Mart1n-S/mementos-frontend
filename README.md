@@ -77,6 +77,14 @@ Suivez ces étapes pour configurer l'environnement de développement de l'applic
    docker-compose up -d
    ```
 
+4. **Lancer les tests**
+
+   Pour tester certaines fonctionnalités, utilisez la commande, les tests ne sont pas complets :
+
+   ```bash
+   npx cypress open
+   ```
+
 ## Pour la configuration du backend
 
 > [GitHub mementos-backend](https://github.com/Mart1n-S/mementos-backend)
