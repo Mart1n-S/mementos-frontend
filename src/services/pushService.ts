@@ -29,7 +29,7 @@ export async function subscribeUserToPush(): Promise<PushSubscription> {
   const subscribeOptions = {
     userVisibleOnly: true,
     applicationServerKey: urlBase64ToUint8Array(
-      'BEyFGgcn3-4ZrWx2Yd6IX3xoJKzvDN3tQpfbNbMLHp8J4fCnTbFX8mT2Nu6H7MPZX73ky2ZIQkwN_-wfhtDyef4'
+      'BCExnASOLyBb14wCrXiI63Gt7MIrRyBgA11r3XMtcL8TxSv-RzrQ5uI7-x7rSL31b4K1yNgEgFHZW6nQONxkUBc'
     ),
   };
 
@@ -62,7 +62,7 @@ export async function subscribeGuestToPush(): Promise<PushSubscription> {
   const subscribeOptions = {
     userVisibleOnly: true,
     applicationServerKey: urlBase64ToUint8Array(
-      'BEyFGgcn3-4ZrWx2Yd6IX3xoJKzvDN3tQpfbNbMLHp8J4fCnTbFX8mT2Nu6H7MPZX73ky2ZIQkwN_-wfhtDyef4'
+      'BCExnASOLyBb14wCrXiI63Gt7MIrRyBgA11r3XMtcL8TxSv-RzrQ5uI7-x7rSL31b4K1yNgEgFHZW6nQONxkUBc'
     ),
   };
 

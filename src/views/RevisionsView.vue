@@ -67,14 +67,14 @@
                                         <li><strong>Niveau 2 :</strong> Révision tous les 2 jours. Une fois qu'une
                                             carte
                                             est
-                                            correctement rappelée au niveau 1, elle passe au niveau 2 et doit être
+                                            correctement mémorisée au niveau 1, elle passe au niveau 2 et doit être
                                             révisée tous les deux
                                             jours.</li>
                                         <li><strong>Niveaux ultérieurs :</strong> Chaque niveau suit la formule
                                             2^(N-1)
                                             jours.</li>
 
-                                        <li><strong>❗Attention❗</strong>Si vous vous trompez la carte, reviens au
+                                        <li><strong>❗Attention❗</strong>Si vous vous trompez, la carte retombe au
                                             niveau
                                             1.</li>
                                     </ul>
